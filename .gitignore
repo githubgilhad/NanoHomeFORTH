@@ -3,3 +3,6 @@
 *.swp
 tmp
 old
+build
+build-*
+tags
