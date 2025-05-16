@@ -126,9 +126,11 @@ BIOS& BIOS::operator<< (const char* str) {	// {{{ Operátor pro zápis řetězce
 	return *this;
 }	// }}}
 BIOS& BIOS::operator<< (const __FlashStringHelper* str) {	// {{{ Operátor pro zápis řetězce z __flash paměti
-	char buffer[64];  // Pro uchování řetězce
-	strcpy_P(buffer, (const char*)str);
-	*this << buffer;  // Volání operátoru pro normální řetězce
+	const char* p = reinterpret_cast<const char*>(str);
+	char c;
+	while ((c = pgm_read_byte_near(p++))) {
+		*this << c;
+	}
 	return *this;
 }	// }}}
 BIOS& BIOS::operator<< (int num) {	// {{{
@@ -324,6 +326,9 @@ uint16_t BIOS::get_key() {										// {{{
 						case x9: key='9'; break;
 						case x0: key='0'; break;
 						case xDot: key='.'; break;
+						case xStar: key='*'; break;
+						case xMinus: key='-'; break;
+						case xPlus: key='+'; break;
 						};
 					return key;
 				}

@@ -26,6 +26,13 @@ Small home computer with monitor and keyboard and FORTH as system
 
 It started as merge of **memxFORTH-core** and **NanoHomeComputer** projects
 
+WARNING
+========
+
+does not fully work yet. There are probabely some memory/stack issues, on Nano it sometimes fails without visible reason (program goes wild, screen flyes, ... probabelly nasal demons involved)
+
+Looks like with pushing 7+ items into stack and then printing it out with . makes real system stack hit VRAM (or something like that - binary goo flows from bottom of screeen up - so from higher to lower adresses)
+
 memxFORTH-core
 ==============
 

@@ -3,3 +3,7 @@ Nano Home Computer with FORTH - ATmega328P/2560 - VGA, RCA, PS/2
 Zkopírováno z  
 * memxFORTH-core   * f116374 count- count+
 * NanoHomeComputer * fc94b27 fixed speed for Had
+
+/usr/bin/avrdude -U hfuse:r:-:h -U lfuse:r:-:h -U efuse:r:-:h -v -V -p atmega328p -D -c usbasp  	# read fuses
+/usr/bin/avrdude -U lfuse:w:0xBF:m -v -V -p atmega328p -D -c usbasp 	# set FB for 16MHz on D8
+/usr/bin/avrdude -U hfuse:w:0xDA:m -U lfuse:w:0xBF:m -U efuse:w:0xFD:m -v -V -p atmega328p -D -c usbasp  	# set all

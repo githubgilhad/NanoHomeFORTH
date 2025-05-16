@@ -11,22 +11,22 @@ extern void write_charA(char c);
 //
 
 void error(const __memx char *c) { 	// {{{
-	write_str(F(BG_RED CLR_BLUE STYLE_BOLD "«" )); //0xC2 0xAB);//'«'
+	write_str(F(BG_RED CLR_BLUE STYLE_BOLD STR_2LESS )); //0xC2 0xAB);//'«'
 	while (*c){write_char(*c++);};
-	write_str(F("»" CLR_RESET "\r\n"));// 0xC2 0xBB);//'»'
+	write_str(F(STR_2MORE CLR_RESET "\r\n"));// 0xC2 0xBB);//'»'
 }	// }}}
 void info(const __memx char *c) { 	// {{{
 	if (noinfo) return;
-	write_str(F(BG_BLUE STYLE_BOLD "«" )); //0xC2 0xAB);//'«'
+	write_str(F(BG_BLUE STYLE_BOLD STR_2LESS )); //0xC2 0xAB);//'«'
 	while (*c){write_char(*c++);};
-	write_str(F("»" CLR_RESET ));// 0xC2 0xBB);//'»'
+	write_str(F(STR_2MORE CLR_RESET ));// 0xC2 0xBB);//'»'
 //	write_str(F( "\r\n"));
 }	// }}}
 void trace(const __memx char *c) { 	// {{{
 	if (notrace) return;
-	write_str(F(BG_GREEN STYLE_BOLD "«" )); //0xC2 0xAB);//'«'
+	write_str(F(BG_GREEN STYLE_BOLD STR_2LESS )); //0xC2 0xAB);//'«'
 	while (*c){write_char(*c++);};
-	write_str(F("»" CLR_RESET ));// 0xC2 0xBB);//'»'
+	write_str(F(STR_2MORE CLR_RESET ));// 0xC2 0xBB);//'»'
 //	write_str(F( "\r\n"));
 }	// }}}
 
@@ -90,11 +90,14 @@ void debug_dump(uint32_t address, const __memx char* label) {	 // {{{
 		if( i==16 || i==32 ) write_str(F(" | "));
 		uint32_t curr = start + i;
 		bool in_range = is_ram_address(curr) || is_flash_address(curr);
-		if (curr == addr) write_str(F(BG_GREEN));
+		if (curr == addr) write_str(F(BG_GREEN STR_2LESS));
 		if (in_range) { write_hex8(read_memx(curr));
 		} else { write_str(F("  ")); };
-		if (curr == addr) write_str(F(CLR_RESET));
-		write_char(' ');
+		if (curr == addr) {
+			write_str(F(STR_2MORE CLR_RESET));
+		} else if (curr+1 != addr) {
+			write_char(' ');
+		};
 	}
 
 	write_str(F(" || '"));
@@ -113,9 +116,9 @@ void debug_dump(uint32_t address, const __memx char* label) {	 // {{{
 		}
 
 		if (curr == addr) {
-			write_str(F(BG_GREEN));
+			write_str(F(BG_GREEN STR_2LESS));
 			write_charA(c);
-			write_str(F(CLR_RESET));
+			write_str(F(STR_2MORE CLR_RESET));
 		} else {
 			write_charA(c);
 		}

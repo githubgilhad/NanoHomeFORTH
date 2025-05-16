@@ -2,7 +2,18 @@
 // ,,g = gcc, exactly one space after "set"
 
 //	ANSI barvy (volitelně vypnout)
-#define ANSI_COLORS 1
+#ifndef ANSI_COLORS
+	#ifndef OUTPUT_TARGET
+		#define ANSI_COLORS 1
+	#elif OUTPUT_TARGET == OUTPUT_TARGET_vram
+		#define ANSI_COLORS 0
+	#elif OUTPUT_TARGET == OUTPUT_TARGET_terminal
+		#define ANSI_COLORS 1
+	#else
+		#warning "Unknown target OUTPUT_TARGET"
+	#endif
+#endif
+
 #if ANSI_COLORS
 	#define CLR_GREY    "\x1b[90m"
 	#define CLR_GREEN   "\x1b[32m"

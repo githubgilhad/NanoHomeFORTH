@@ -4,12 +4,16 @@
 #include <stdint.h>
 #include <avr/pgmspace.h>
 #include <stdbool.h>
+#include "defines.h"
 #include "colors.h"
 #include "flags.h"
 #include "ptr24.h"
 #include "io.h"
 #define DEBUG_DUMP(P,LBL) debug_dump(P24p(P),F(LBL));
 #define DEBUG_DUMPu(U,LBL) debug_dump((ptr24_u ){.u32=U},F(LBL));
+#define ERROR(X) error(X)
+#define INFO(X) info(X)
+#define TRACE(X) trace(X)
 void error(const __memx char *c); 
 void info(const __memx char *c); 
 void trace(const __memx char *c); 
@@ -25,7 +29,4 @@ void debug_dump(uint32_t address, const __memx char* label);
 extern bool nodebug;
 extern bool noinfo;
 extern bool notrace;
-	#define STR_2LESS "«" //0xC2 0xAB);//'«'
-	#define STR_2MORE "»" // 0xC2 0xBB);//'»'
-
 #endif
