@@ -2,9 +2,11 @@
 // ,,g = gcc, exactly one space after "set"
 #include "debug.h"
 bool nodebug=true;
-bool noinfo=true;
-bool notrace=true;
 //bool nodebug=false;
+bool noinfo=true;
+//bool noinfo=false;
+//bool notrace=true;
+bool notrace=false;
 //
 extern void write_char(char c);
 extern void write_charA(char c);

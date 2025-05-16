@@ -26,12 +26,18 @@ Small home computer with monitor and keyboard and FORTH as system
 
 It started as merge of **memxFORTH-core** and **NanoHomeComputer** projects
 
-WARNING
+So far I managed to create small FORTH computer with 300B RAM free, more than 100 words, and able to be programmed from keyboard. Small step first, ASCII table to demonstrate programming ( : ascii 0 BEGIN DUP EMIT 1 + DUP 0x100 - ==0 UNTIL DROP ; ) debuging ( ' ascii show ), on top of screen is actual free system memory and its minimum so far (no leaks)  and implemented charset
+
+|ascii.jpg|
+
+Troubles
 ========
 
 does not fully work yet. There are probabely some memory/stack issues, on Nano it sometimes fails without visible reason (program goes wild, screen flyes, ... probabelly nasal demons involved)
 
 Looks like with pushing 7+ items into stack and then printing it out with . makes real system stack hit VRAM (or something like that - binary goo flows from bottom of screeen up - so from higher to lower adresses)
+
+**Fixed** Chaining functions leaked stack variables. So I made them global instead and saved memory :)
 
 memxFORTH-core
 ==============
@@ -252,3 +258,9 @@ GPL 2 or GPL 3 - choose the one that suits your needs.
 Author
 ------
 Gilhad - 2025
+
+.. |ascii.jpg| image:: ascii.jpg
+	:width: 250
+	:align: top
+	:target: ascii.jpg
+

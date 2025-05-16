@@ -139,16 +139,17 @@ extern const __memx DOUBLE_t		val_of_w_exit_cw;
 extern const __memx DOUBLE_t		val_of_f_docol;
 
 #define NEXT f_next()
+//void f_next() __attribute__((noreturn));
 void f_next(){
-	INFO("f_next");
+	INFO(F("f_next"));
 	DT=B3at(IP);
-debug_dump(IP,"IP old	");
+DEBUG_DUMP(IP,("IP old	"));
 //	ERROR("Press ANY key to continue");
 //	wait_for_char();
 	IP+=4;		// IP++ but 4 bytes everytime
-debug_dump(IP,"IP new	");
-debug_dump(DT,"DT new	");
-debug_dump(B3at(DT),"*DT	");
+DEBUG_DUMP(IP,("IP new	"));
+DEBUG_DUMP(DT,("DT new	"));
+DEBUG_DUMP(B3at(DT),("*DT	"));
 	jmp_indirect_24(DT);
 }
 
@@ -159,12 +160,12 @@ CELL_t pop() {
 		return 0;
 		};
 	if (! noinfo) write_hex16(stck[stack-1]);
-	INFO("pop");
+	INFO(F("pop"));
 	return stck[--stack];
 }
 void push(CELL_t x) {
 	if (! noinfo) write_hex16(x);
-	INFO("push");
+	INFO(F("push"));
 	if(stack>STACK_LEN-1) {
 		ERROR(F("push - Stack owerlow"));
 		return;
@@ -177,7 +178,7 @@ CELL_t peek(){
 		return 0;
 		};
 	if (! noinfo) write_hex16(stck[stack-1]);
-	INFO("peek");
+	INFO(F("peek"));
 	return stck[stack-1];
 }
 CELL_t peekX(uint8_t depth){
@@ -186,7 +187,7 @@ CELL_t peekX(uint8_t depth){
 		return 0;
 		};
 	if (! noinfo) write_hex16(stck[stack-1-depth]);
-	INFO("peek");
+	INFO(F("peek"));
 	return stck[stack-1-depth];
 }
 // }}}
@@ -197,7 +198,7 @@ DOUBLE_t pop2() {
 		return 0;
 		};
 	if (! noinfo) write_hex32((stck[stack-2]*(1L<<16))+stck[stack-1]);
-	INFO("pop2");
+	INFO(F("pop2"));
 	DOUBLE_t r=stck[stack-2]*(1L<<16)+stck[stack-1];
 	stack-=2;
 	return r;
@@ -208,7 +209,7 @@ void push2(DOUBLE_t x) {
 		return;
 		};
 	if (! noinfo) write_hex32(x);
-	INFO("push2");
+	INFO(F("push2"));
 	stck[stack++]=x>>16;
 	stck[stack++]=x&0xFFFF;
 }
@@ -218,7 +219,7 @@ DOUBLE_t peek2(){
 		return 0;
 		};
 	if (! noinfo) write_hex32(stck[stack-2]*(1L<<16)+stck[stack-1]);
-	INFO("peek2");
+	INFO(F("peek2"));
 	return stck[stack-2]*(1L<<16)+stck[stack-1];
 }
 DOUBLE_t peek2X(uint8_t depth){
@@ -227,7 +228,7 @@ DOUBLE_t peek2X(uint8_t depth){
 		return 0;
 		};
 	if (! noinfo) write_hex32(stck[stack-2-depth]*(1L<<16)+stck[stack-1-depth]);
-	INFO("peek2");
+	INFO(F("peek2"));
 	return stck[stack-2-depth]*(1L<<16)+stck[stack-1-depth];
 }
 // }}}
@@ -238,12 +239,12 @@ PTR_t Rpop() {
 		return 0;
 		};
 	if (! noinfo) write_hex32(Rstck[Rstack-1]);
-	INFO("Rpop");
+	INFO(F("Rpop"));
 	return Rstck[--Rstack];
 }
 void Rpush(PTR_t x) {
 	if (! noinfo) write_hex32(x);
-	INFO("Rpush");
+	INFO(F("Rpush"));
 	if(Rstack>RSTACK_LEN-1) {
 		ERROR(F("Rpush - Stack owerlow"));
 		return;
@@ -256,7 +257,7 @@ PTR_t Rpeek(){
 		return 0;
 		};
 	if (! noinfo) write_hex32(Rstck[Rstack-1]);
-	INFO("Rpeek");
+	INFO(F("Rpeek"));
 	return Rstck[Rstack-1];
 }
 // }}}
@@ -600,8 +601,8 @@ void f_docol() {	// {{{
 // ERROR("Press ANY key to continue");wait_for_char();
 	Rpush(IP);
 	IP=DT+4;	// README: DT points to 4B codeword, so next address is DT+4B and now it is on Data[0] in the target header
-	debug_dump(IP,"IP in f_docol	");
-	debug_dump(DT,"DT in f_docol	");
+	DEBUG_DUMP(IP,("IP in f_docol	"));
+	DEBUG_DUMP(DT,("DT in f_docol	"));
 	NEXT;
 }	// }}}
 void f_exit(){	// {{{
@@ -643,10 +644,10 @@ void f_comma() {	// {{{ take 3B address (2 CELLs) from datastack and put it to H
 	HERE+=2;
 	NEXT;
 }	// }}}
+	char buf[32];	// stack eating structures cannot be in NEXT-chained functions, or stack will overflow !!!
 void f_dot() { 	 // {{{
 	TRACE(F("."));
 	CELL_t c=pop();
-	char buf[32];
 	itoa(c, buf, BASE);
 	write_str(&buf[0]);
 	NEXT;
@@ -729,24 +730,26 @@ void f_negative0() {	// {{{ ; true if negative or zero
 }	// }}}
 void f_interpret(){	 // {{{
 	INFO(F("f_interpret"));
-	write_str("\r\n");
-	debug_dump(B3U32(&Rstck[Rstack]),F("Rstack	"));
-	debug_dump(B3U32(&stck[stack]),F("stack	"));
-	debug_dump((HERE),F("HERE	"));
-	if (stack>1) debug_dump(peek2(),F("*stack	"));
+//	write_str(F("\r\n"));
+	DEBUG_DUMP(B3U32(&Rstck[Rstack]),("Rstack	"));
+	DEBUG_DUMP(B3U32(&stck[stack]),("stack	"));
+	DEBUG_DUMP((HERE),("HERE	"));
+	if (stack>1) DEBUG_DUMP(peek2(),("*stack	"));
 	for (int8_t p=0;p<stack;p++) {write_char('[');write_hex16(stck[p]);write_char(']');};
 	write_str(F(PROMPT));
 	get_word();
 	INFO(F(" got: "));info(&word_buf[0]);
 	xpHead1 h=findHead(word_buf_len,&word_buf[0],B3PTR(LAST));
 //	write_str(" head found? ");
-//	debug_dump((cmvp)h,"head?");
+//	DEBUG_DUMP((cmvp)h,"head?");
 	if (h!=NULL) { // WORD
 //		write_str("yes");
 		if ((STATE==st_executing) || (h->flags & FLG_IMMEDIATE)) {
-//			debug_dump(get_codeword_addr(h),"jump to	");
+//			DEBUG_DUMP(get_codeword_addr(h),"jump to	");
 			DT=get_codeword_addr(h);
+			INFO(F("jmp_indirect_24"));
 			jmp_indirect_24(get_codeword_addr(h));
+			return; 	// NEXT is in called function
 		} else {
 			comma(get_codeword_addr(h));
 		};
@@ -840,14 +843,14 @@ void f_create(void) {	// {{{ create header of new word
 	uint8_t len=pop();
 	*(uint8_t*)B3PTR(HERE) =len;HERE++;				// 1B len "words"
 //	strncpy_PF((char*)B3PTR(HERE),B3PTR(pop2()),len); HERE+=len;// len Bytes (+\0, but we overwrite it next step)
-	debug_dump(peek2(),"from buff	");
-	debug_dump((HERE),"HERE	");
+	DEBUG_DUMP(peek2(),("from buff	"));
+	DEBUG_DUMP((HERE),("HERE	"));
 	uint32_t from=pop2();
 	// strncpy_PF((char*)B3PTR(HERE),pop2(),len); HERE+=len;// len Bytes (+\0, but we overwrite it next step)
 	for (uint8_t i=0; i<len;i++){
 		*(uint8_t*)B3PTR(HERE++) =*(uint8_t*)B3PTR(from++);
 	};
-	debug_dump((HERE),"HERE	");
+	DEBUG_DUMP((HERE),("HERE	"));
 	LAST=temp_h;
 	NEXT;
 }	// }}}
@@ -896,15 +899,15 @@ void my_setup(){	// {{{
 	*(uint32_t*)B3PTR(HERE)=cw * 2; HERE+=4;	// codeword
 	LAST=temp_h;
 // --------------------------------------------------------------------------------
-	debug_dump(B3U32(&RAM[0]),"RAM	");
-	debug_dump((HERE),"HERE	");
-	debug_dump(LAST,"LAST	");
+	DEBUG_DUMP(B3U32(&RAM[0]),("RAM	"));
+	DEBUG_DUMP((HERE),("HERE	"));
+	DEBUG_DUMP(LAST,("LAST	"));
 // --------------------------------------------------------------------------------
 	ERROR(F("my_setup"));
 	IP = B3U32(&w_test_data);
-	debug_dump(IP,F("IP\t"));
-	debug_dump(val_of_f_docol,"val_of_f_docol");
-	debug_dump(val_of_w_exit_cw,"val_of_w_exit_cw");
+	DEBUG_DUMP(IP,("IP\t"));
+	DEBUG_DUMP(val_of_f_docol,("val_of_f_docol"));
+	DEBUG_DUMP(val_of_w_exit_cw,("val_of_w_exit_cw"));
 	push(0x21);
 	print_words();
 	NEXT;
@@ -912,11 +915,11 @@ void my_setup(){	// {{{
 // --------------------------------------------------------------------------------
 	ERROR(F("Full run"));
 	IP = B3U32(&w_quit_data);
-	debug_dump(IP,F("IP\t"));
-	debug_dump(B3U32(&f_docol),"&f_docol");
+	DEBUG_DUMP(IP,("IP\t"));
+	DEBUG_DUMP(B3U32(&f_docol),("&f_docol"));
 	Rpush(IP);
 	IP=B3U32(&f_docol);
-	debug_dump(IP,"(cmvp)&f_docol");
+	DEBUG_DUMP(IP,("(cmvp)&f_docol"));
 	IP=Rpop();
 	
 	NEXT;

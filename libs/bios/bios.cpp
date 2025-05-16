@@ -1,6 +1,7 @@
 #include <string.h>
 #include "bios.h"
 #include <Arduino.h>
+#include "MemoryFree.h"
 
 //  {{{ divmod10_asm
 //
@@ -81,7 +82,20 @@ uint8_t BIOS::vram[BIOS_ROWS][BIOS_COLS] asm("vram"); 						// array of characte
 uint8_t BIOS::cram[BIOS_ROWS] asm("cram"); 							// array of color video RAM data
 bool BIOS::inverting = false;									// inverting character on cursor automatically?
 /* const */ char BIOS::hexa_digits[16]={'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-
+uint16_t min_m=0xFFFF;
+void memchck(){
+	uint16_t m=freeMemory();
+	if (m<min_m) min_m=m;
+	bios.vram[0][4]=BIOS::hexa_digits[ m & 0xF];
+	bios.vram[0][3]=BIOS::hexa_digits[(m >> 4) & 0xF];
+	bios.vram[0][2]=BIOS::hexa_digits[(m >> 8) & 0xF];
+	bios.vram[0][1]=BIOS::hexa_digits[(m >> 12) & 0xF];
+	
+	bios.vram[0][34]=BIOS::hexa_digits[ min_m & 0xF];
+	bios.vram[0][33]=BIOS::hexa_digits[(min_m >> 4) & 0xF];
+	bios.vram[0][32]=BIOS::hexa_digits[(min_m >> 8) & 0xF];
+	bios.vram[0][31]=BIOS::hexa_digits[(min_m >> 12) & 0xF];
+}
 BIOS::BIOS() {											// {{{
 	charset_hook();
 	BIOS::chardef=&charset;
@@ -412,12 +426,14 @@ ISR(TIMER1_OVF_vect) {
 	if ( BIOS::current_output == BIOS_VGA) {	// {{{ timer1 overflow interrupt resets vline counter at HSYNC
 		BIOS::vline = 0;
 		BIOS::frames++;
+		memchck();
 	} 						// }}}
 	else if ( BIOS::current_output == BIOS_RCA) {	// {{{ TIMER1_OVF vector occurs at the start of each scan line's sync pulse
 		if (++scanline == 312) {
 			OCR1A = 948; 		// scan lines 0 - 7 have wide 59.3us sync pulses
 			scanline = 0;
 			BIOS::frames++;
+			memchck();
 		} else if (scanline == 8) {
 			OCR1A = 74;		// swap to short 4.7us sync pulses for scan lines 8 - 311
 						// enabling the interrupt generates an immediate 'stored up' interrupt

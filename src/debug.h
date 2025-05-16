@@ -9,11 +9,17 @@
 #include "flags.h"
 #include "ptr24.h"
 #include "io.h"
-#define DEBUG_DUMP(P,LBL) debug_dump(P24p(P),F(LBL));
-#define DEBUG_DUMPu(U,LBL) debug_dump((ptr24_u ){.u32=U},F(LBL));
 #define ERROR(X) error(X)
 #define INFO(X) info(X)
 #define TRACE(X) trace(X)
+// #define DEBUG_DUMPp(P,LBL) debug_dump(B3U32(P),F(LBL));
+// #define DEBUG_DUMP(U,LBL) debug_dump(U,F(LBL));
+
+// #define ERROR(X)
+// #define INFO(X)
+// #define TRACE(X)
+#define DEBUG_DUMPp(P,LBL) 
+#define DEBUG_DUMP(U,LBL) 
 void error(const __memx char *c); 
 void info(const __memx char *c); 
 void trace(const __memx char *c); 

@@ -7,3 +7,11 @@ Zkopírováno z
 /usr/bin/avrdude -U hfuse:r:-:h -U lfuse:r:-:h -U efuse:r:-:h -v -V -p atmega328p -D -c usbasp  	# read fuses
 /usr/bin/avrdude -U lfuse:w:0xBF:m -v -V -p atmega328p -D -c usbasp 	# set FB for 16MHz on D8
 /usr/bin/avrdude -U hfuse:w:0xDA:m -U lfuse:w:0xBF:m -U efuse:w:0xFD:m -v -V -p atmega328p -D -c usbasp  	# set all
+
+po ocesani vsech aplikaci zbyva 1002 B RAM a
+FLASH: 	|   7718 | 0x1E26 | data: 32 + text: 7686
+RAM:   	|   1035 | 0x040B | data: 32 + bss: 1003
+
+fixed RAM leak from stack variables in chaining, RT memory meters. FORTH: 320B RAM 10 lvl stacks (20 B and 40B)
+FLASH: 	|  23344 | 0x5B30 | data: 42 + text: 23302
+RAM:   	|   1521 | 0x05F1 | data: 42 + bss: 1479
