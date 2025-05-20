@@ -382,53 +382,8 @@ DEFWORD w_positive0, 0, ">=0", f_positive0	; true if positive or zero
 DEFWORD w_negative, 0, "<0", f_negative		; true if negative
 DEFWORD w_negative0, 0, "<=0", f_negative0	; true if negative or zero
 ; -------------------------------------------------------------------------------- more FORTH words
-DEFWORD w_quit,0,"QUIT",f_docol
-	.long w_interpret_cw
-	.long w_branch_cw
-	.long -2
-DEFWORD w_hide, 0, "HIDE", f_docol		; HIDE WORD hide/unhide the word
-	.long w_word_cw,w_find_cw,w_hidden_cw,w_exit_cw
-DEFWORD w_colon,0,":",f_docol
-	.long w_word_cw, w_create_cw			; create header
-	.long w_lit2_cw, f_docol, w_comma_cw		; fill CW
-	.long var_LAST_cw, w_DoubleAt_cw, w_hidden_cw	; hide until done
-	.long w_right_brac_cw, w_exit_cw		; go to conpile
-DEFWORD w_semicol,FLG_IMMEDIATE,";",f_docol
-	.long w_lit2_cw, w_exit_cw, w_comma_cw		; end word
-	.long var_LAST_cw, w_DoubleAt_cw, w_hidden_cw	; unhide it
-	.long w_left_brac_cw, w_exit_cw			; back to immediate
-DEFWORD w_forget,0,"FORGET",f_docol			; forget word (and all after)
-	.long w_word_cw, w_find_cw
-	.long w_dup_D_cw, w_DoubleAt_cw, var_LAST_cw, w_StoreDouble_cw
-	.long var_HERE_cw, w_DoubleAt_cw, w_StoreDouble_cw, w_exit_cw
-DEFWORD w_if, FLG_IMMEDIATE, "IF", f_docol		; do if not zero
-	.long w_tick_cw, w_0branch_cw,w_comma_cw	; if zero, branch
-	.long var_HERE_cw, w_DoubleAt_cw, w_lit2_cw,0,w_comma_cw	; save this pos, fill 0 for now
-	.long w_exit_cw
-DEFWORD w_fi, FLG_IMMEDIATE, "FI", f_docol		; fi - end of IF
-	.long w_dup_D_cw, var_HERE_cw, w_DoubleAt_cw, w_swap_D_cw, w_minus_D_cw, w_div4_D_cw, w_swap_D_cw,w_StoreDouble_cw,w_exit_cw
-DEFWORD w_then, FLG_IMMEDIATE, "THEN", f_docol		; fi - end of IF
-	.long w_fi_cw, w_exit_cw
-DEFWORD w_else, FLG_IMMEDIATE, "ELSE", f_docol		; else do this
-	.long w_tick_cw, w_branch_cw,w_comma_cw		; like in IF, but branch everytime
-	.long var_HERE_cw, w_DoubleAt_cw, w_lit2_cw, 0,w_comma_cw	; save this pos, fill 0 for now
-	.long w_swap_D_cw, w_fi_cw, w_exit_cw		; swap this and IFs address and fill it like FI
-DEFWORD w_begin, FLG_IMMEDIATE, "BEGIN", f_docol	; BEGIN loop-part condition UNTIL
-	.long var_HERE_cw, w_DoubleAt_cw, w_exit_cw
-DEFWORD w_until, FLG_IMMEDIATE, "UNTIL", f_docol	; BEGIN loop-part condition UNTIL
-	.long w_tick_cw, w_0branch_cw,w_comma_cw
-	.long var_HERE_cw, w_DoubleAt_cw, w_minus_D_cw, w_div4_D_cw, w_comma_cw
-	.long w_exit_cw
-DEFWORD w_while, FLG_IMMEDIATE, "WHILE", f_docol	; BEGIN condition WHILE loop-part REPEAT
-	.long w_if_cw,w_exit_cw
-DEFWORD w_repeat, FLG_IMMEDIATE, "REPEAT", f_docol	; BEGIN condition WHILE loop-part REPEAT
-	.long w_tick_cw, w_branch_cw,w_comma_cw		; compile BRANCH
-	.long w_swap_D_cw				; get the original offset (from BEGIN)
-	.long var_HERE_cw, w_DoubleAt_cw, w_minus_D_cw, w_div4_D_cw, w_comma_cw	; and compile it after BRANCH
-	.long w_swap_D_cw
-	.long var_HERE_cw, w_DoubleAt_cw, w_swap_D_cw, w_minus_D_cw, w_div4_D_cw	; calculate the offset2
-	.long w_swap_D_cw, w_StoreDouble_cw, w_exit_cw	; and back-fill it in the original location
 
+#include "words.inc"
 
 
 	.global val_of_w_exit_cw, val_of_f_docol

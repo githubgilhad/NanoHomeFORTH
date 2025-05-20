@@ -19,3 +19,6 @@ include ../Makefile
 
 $(TARGET_ELF): $(VERSION_HEADER)
 
+asm.S: words.inc
+words.inc: words.4th
+	./forth2inc.py
