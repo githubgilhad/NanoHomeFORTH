@@ -84,22 +84,24 @@ fout=0
 glob_middle=""
 def out( left, right):
 	global args,fout,glob_middle
+	tab = -7 if left[0]=='\t' else 0
 	if (len(left) or len(right)):
-		fout.write(f"{left:<{args.col}}")
+		fout.write(f"{left:<{args.col+tab}}")
 		if len(right):
-			fout.write(f"{glob_middle}{right}\n")
+			fout.write(f" {glob_middle}{right}\n")
 		else:
 			fout.write("\n")
 
 glob_stat=0
 def do_token(token,left,right,line):
-	global glob_stat, glob_imm, known
+	global glob_stat, glob_imm, known, fout
 	if (glob_stat == 0) and (token==':'):
 		glob_stat=1
 		return (left,right)
-	out(left, right)
-	left=""
-	right=""
+	if len(left):
+		out(left, right)
+		left=""
+		right=""
 	if (glob_stat == 1):
 		nick = extract_nick_from_comment(line)
 		imm = extract_immediate_from_line(line)
@@ -107,6 +109,7 @@ def do_token(token,left,right,line):
 			nick = "w_"+token
 		else:
 			nick = "w_"+nick
+		fout.write("\n")
 		left=f'DEFWORD {nick},{imm},"{token}",f_docol'
 		known[token]=nick
 		out(left, right)
@@ -210,6 +213,7 @@ def main():
 	with open(args.source, encoding='utf-8') as f:
 		source_lines = f.readlines()
 		with  open(args.outfile, 'w',  encoding='utf-8') as fout:
+			fout.write(";/* vim: set filetype=asm noexpandtab fileencoding=utf-8 nomodified nowrap textwidth=270 foldmethod=marker foldmarker={{{,}}} foldcolumn=4 ruler showcmd lcs=tab\\:|- list: */\n\n")
 			for lineno, line in enumerate(source_lines):
 				depth = process(line.rstrip('\n'), lineno, depth, fout);
 
