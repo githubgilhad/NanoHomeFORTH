@@ -141,123 +141,123 @@ extern const __memx DOUBLE_t		val_of_f_docol;
 #define NEXT f_next()
 //void f_next() __attribute__((noreturn));
 void f_next(){
-	INFO(F("f_next"));
+	INFO("f_next");
 	DT=B3at(IP);
-DEBUG_DUMP(IP,("IP old	"));
+DEBUG_DUMP(IP,"IP old	");
 //	ERROR("Press ANY key to continue");
 //	wait_for_char();
 	IP+=4;		// IP++ but 4 bytes everytime
-DEBUG_DUMP(IP,("IP new	"));
-DEBUG_DUMP(DT,("DT new	"));
-DEBUG_DUMP(B3at(DT),("*DT	"));
+DEBUG_DUMP(IP,"IP new	");
+DEBUG_DUMP(DT,"DT new	");
+DEBUG_DUMP(B3at(DT),"*DT	");
 	jmp_indirect_24(DT);
 }
 
 // {{{ pop ...
 CELL_t pop() {
 	if (stack==0) {
-		ERROR(F("pop - Stack underflow"));
+		ERROR("pop - Stack underflow");
 		return 0;
 		};
 	if (! noinfo) write_hex16(stck[stack-1]);
-	INFO(F("pop"));
+	INFO("pop");
 	return stck[--stack];
 }
 void push(CELL_t x) {
 	if (! noinfo) write_hex16(x);
-	INFO(F("push"));
+	INFO("push");
 	if(stack>STACK_LEN-1) {
-		ERROR(F("push - Stack owerlow"));
+		ERROR("push - Stack owerlow");
 		return;
 		};
 	stck[stack++]=x;
 }
 CELL_t peek(){
 	if (stack<1) {
-		ERROR(F("peek - No Stack left"));
+		ERROR("peek - No Stack left");
 		return 0;
 		};
 	if (! noinfo) write_hex16(stck[stack-1]);
-	INFO(F("peek"));
+	INFO("peek");
 	return stck[stack-1];
 }
 CELL_t peekX(uint8_t depth){
 	if (stack<1+depth) {
-		ERROR(F("peek - No Stack left"));
+		ERROR("peek - No Stack left");
 		return 0;
 		};
 	if (! noinfo) write_hex16(stck[stack-1-depth]);
-	INFO(F("peek"));
+	INFO("peek");
 	return stck[stack-1-depth];
 }
 // }}}
 // {{{ pop2 ...
 DOUBLE_t pop2() {
 	if (stack<2) {
-		ERROR(F("pop2 - Stack underflow"));
+		ERROR("pop2 - Stack underflow");
 		return 0;
 		};
 	if (! noinfo) write_hex32((stck[stack-2]*(1L<<16))+stck[stack-1]);
-	INFO(F("pop2"));
+	INFO("pop2");
 	DOUBLE_t r=stck[stack-2]*(1L<<16)+stck[stack-1];
 	stack-=2;
 	return r;
 }
 void push2(DOUBLE_t x) {
 	if(stack>STACK_LEN-2) {
-		ERROR(F("push2 - Stack owerlow"));
+		ERROR("push2 - Stack owerlow");
 		return;
 		};
 	if (! noinfo) write_hex32(x);
-	INFO(F("push2"));
+	INFO("push2");
 	stck[stack++]=x>>16;
 	stck[stack++]=x&0xFFFF;
 }
 DOUBLE_t peek2(){
 	if (stack<2) {
-		ERROR(F("peek2 - No Stack left"));
+		ERROR("peek2 - No Stack left");
 		return 0;
 		};
 	if (! noinfo) write_hex32(stck[stack-2]*(1L<<16)+stck[stack-1]);
-	INFO(F("peek2"));
+	INFO("peek2");
 	return stck[stack-2]*(1L<<16)+stck[stack-1];
 }
 DOUBLE_t peek2X(uint8_t depth){
 	if (stack<2+depth) {
-		ERROR(F("peek2 - No Stack left"));
+		ERROR("peek2 - No Stack left");
 		return 0;
 		};
 	if (! noinfo) write_hex32(stck[stack-2-depth]*(1L<<16)+stck[stack-1-depth]);
-	INFO(F("peek2"));
+	INFO("peek2");
 	return stck[stack-2-depth]*(1L<<16)+stck[stack-1-depth];
 }
 // }}}
 // {{{ Rpop ...
 PTR_t Rpop() {
 	if (Rstack==0) {
-		ERROR(F("Rpop - Stack underflow"));
+		ERROR("Rpop - Stack underflow");
 		return 0;
 		};
 	if (! noinfo) write_hex32(Rstck[Rstack-1]);
-	INFO(F("Rpop"));
+	INFO("Rpop");
 	return Rstck[--Rstack];
 }
 void Rpush(PTR_t x) {
 	if (! noinfo) write_hex32(x);
-	INFO(F("Rpush"));
+	INFO("Rpush");
 	if(Rstack>RSTACK_LEN-1) {
-		ERROR(F("Rpush - Stack owerlow"));
+		ERROR("Rpush - Stack owerlow");
 		return;
 		};
 	Rstck[Rstack++]=x;
 }
 PTR_t Rpeek(){
 	if (Rstack==0) {
-		ERROR(F("Rpeek - No Stack left"));
+		ERROR("Rpeek - No Stack left");
 		return 0;
 		};
 	if (! noinfo) write_hex32(Rstck[Rstack-1]);
-	INFO(F("Rpeek"));
+	INFO("Rpeek");
 	return Rstck[Rstack-1];
 }
 // }}}
@@ -301,10 +301,10 @@ uint32_t get_codeword_addr(xpHead1 h){	 // {{{ // Data_t
 // }}}
 
 void f_docol(); 	// FORWARD
-#define VARfn(name)	void push_var_##name(){TRACE(F(#name));push(0x80);push((CELL_t)((uint16_t)(&name)));NEXT;}
+#define VARfn(name)	void push_var_##name(){TRACE(#name);push(0x80);push((CELL_t)((uint16_t)(&name)));NEXT;}
 #define VAR(name,value)	CELL_t name=(CELL_t)value;VARfn(name)
-#define CONST(name,value)	void push_const_##name(){TRACE(F(#name));push(value); NEXT;}
-#define CONST2(name,value)	void push_const_##name(){TRACE(F(#name));push2(value); NEXT;}
+#define CONST(name,value)	void push_const_##name(){TRACE(#name);push(value); NEXT;}
+#define CONST2(name,value)	void push_const_##name(){TRACE(#name);push2(value); NEXT;}
 
 typedef enum { st_executing, st_compiling} st_STATE;
 VARfn(LAST)	// LAST is in RAM, just points "somewhere"
@@ -317,67 +317,77 @@ CONST2(DOCOL,B3U32(f_docol))
 CONST2(RAM,B3U32(RAM))
 // {{{ dup, plus, ...
 void f_dup(){	// {{{
-	TRACE(F("DUP"));
+	TRACE("DUP");
 	push(peek());
 	NEXT;
 }	// }}}
 void f_drop(){	// {{{
-	TRACE(F("DROP"));
+	TRACE("DROP");
 	pop();
 	NEXT;
 }	// }}}
 void f_swap() {	// {{{
-	TRACE(F("SWAP"));
+	TRACE("SWAP");
 	CELL_t a=pop();
 	CELL_t b=pop();
 	push(a);
 	push(b);
 	NEXT;
 }	// }}}
+void f_or(){	// {{{
+	TRACE("OR");
+	push((pop()||pop())?F_TRUE:F_FALSE);
+	NEXT;
+}	// }}}
+void f_and(){	// {{{
+	TRACE("AND");
+	push((pop()&&pop())?F_TRUE:F_FALSE);
+	NEXT;
+}	// }}}
 void f_plus(){	// {{{
-	TRACE(F("+"));
+	TRACE("+");
 	push(pop()+pop());
 	NEXT;
 }	// }}}
 void f_minus(){	// {{{
-	TRACE(F("-"));
+	TRACE("-");
 	CELL_t c=pop();
 	push(pop()-c);
 	NEXT;
 }	// }}}
 void f_times() {	// {{{
-	TRACE(F("*"));
+	TRACE("*");
 	push(pop()*pop());
 	NEXT;
 }	// }}}
 void f_div() {	// {{{
-	TRACE(F("/"));
+	TRACE("/");
 	CELL_t a=pop();
 	push(pop()/a);
 	NEXT;
 }	// }}}
 void f_div2() {	// {{{
-	TRACE(F("/2"));
+	TRACE("/2");
 	push(pop()/2);
 	NEXT;
 }	// }}}
 void f_div4() {	// {{{
-	TRACE(F("/4"));
+	TRACE("/4");
 	push(pop()/4);
 	NEXT;
 }	// }}}
 void f_dup_D() {	// {{{
-	TRACE(F("DUP2"));
+	TRACE("DUP2");
 	push2(peek2());
 	NEXT;
 }	// }}}
 void f_drop_D() {	// {{{
-	TRACE(F("DROP2"));
+	TRACE("DROP2");
 	pop2();
 	NEXT;
 }	// }}}
 void f_swap_D() {	// {{{
-	TRACE(F("SWAP2"));
+	TRACE("SWAP2");
 	DOUBLE_t a=pop2();
 	DOUBLE_t b=pop2();
 	push2(a);
@@ -385,46 +395,46 @@ void f_swap_D() {	// {{{
 	NEXT;
 }	// }}}
 void f_plus_D() {	// {{{
-	TRACE(F("+D"));
+	TRACE("+D");
 	push2(pop2()+pop2());
 	NEXT;
 }	// }}}
 void f_minus_D() {	// {{{
-	TRACE(F("-D"));
+	TRACE("-D");
 	DOUBLE_t c=pop2();
 	push2(pop2()-c);
 	NEXT;
 }	// }}}
 void f_times_D() {	// {{{
-	TRACE(F("*D"));
+	TRACE("*D");
 	push2(pop2()*pop2());
 	NEXT;
 }	// }}}
 void f_div_D() {	// {{{
-	TRACE(F("/D"));
+	TRACE("/D");
 	DOUBLE_t a=pop2();
 	push2(pop2()/a);
 	NEXT;
 }	// }}}
 void f_div2_D() {	// {{{
-	TRACE(F("/2D"));
+	TRACE("/2D");
 	push2(pop2()/2);
 	NEXT;
 }	// }}}
 void f_div4_D() {	// {{{
-	TRACE(F("/4D"));
+	TRACE("/4D");
 	push2(pop2()/4);
 	NEXT;
 }	// }}}
 void f_c2C() {	// {{{ ; cell -> 2 C
-	TRACE(F("c2C"));
+	TRACE("c2C");
 	CELL_t c=pop();
 	push((c>>8)&0xFF);
 	push(c&0xFF);
 	NEXT;
 }	// }}}
 void f_D4C() {	// {{{ ; Double -> 4C
-	TRACE(F("D4C"));
+	TRACE("D4C");
 	DOUBLE_t d=pop2();
 	push((d>>24)&0xFF);
 	push((d>>16)&0xFF);
@@ -433,13 +443,13 @@ void f_D4C() {	// {{{ ; Double -> 4C
 	NEXT;
 }	// }}}
 void f_2Cc() {	// {{{ ; 2 C -> cell
-	TRACE(F("2Cc"));
+	TRACE("2Cc");
 	CELL_t c=pop();
 	push((pop()<<8)+c);
 	NEXT;
 }	// }}}
 void f_4CD() {	// {{{ ; 4 C -> Double
-	TRACE(F("4CD"));
+	TRACE("4CD");
 	DOUBLE_t d=pop();
 	d+=pop()*0x100;
 	d+=pop()*0x10000;
@@ -449,67 +459,67 @@ void f_4CD() {	// {{{ ; 4 C -> Double
 	NEXT;
 }	// }}}
 void f_1minus() {	// {{{ ; decrement TOS by 1
-	TRACE(F("1-"));
+	TRACE("1-");
 	stck[stack-1]--;
 	NEXT;
 }	// }}}
 void f_4minus() {	// {{{ ; decrement TOS by 4
-	TRACE(F("4-"));
+	TRACE("4-");
 	stck[stack-1]-=4;
 	NEXT;
 }	// }}}
 void f_Store(){	// {{{ ! ( cell Daddr --  ) store cell at address(Double)
-	TRACE(F("!"));
+	TRACE("!");
 	DOUBLE_t d=pop2();
 	*(CELL_t*)B3PTR(d)=pop();
 	NEXT;
 }	// }}}
 void f_StoreChar(){	// {{{ !C ( char Daddr -- ) store char at address(Double)
-	TRACE(F("!C"));
+	TRACE("!C");
 	DOUBLE_t d=pop2();
 	uint8_t v=pop();
 	*(uint8_t*)B3PTR(d)=v;
 	NEXT;
 }	// }}}
 void f_StoreDouble(){	// {{{ !D ( D Daddr -- ) store Double at address(Double)
-	TRACE(F("!D"));
+	TRACE("!D");
 	DOUBLE_t d=pop2();
 	*(uint32_t*)B3PTR(d)=pop2();
 	NEXT;
 }	// }}}
 void f_At(){	// {{{ @ ( Daddr -- cell ) cell at address(Double)
-	TRACE(F("@"));
+	TRACE("@");
 	push(B2at(pop2()));
 	NEXT;
 }	// }}}
 void f_CharAt(){	// {{{ C@ ( Daddr -- char ) char at address(Double)
-	TRACE(F("C@"));
+	TRACE("C@");
 	push(B2at(pop2())&0xFF);
 	NEXT;
 }	// }}}
 void f_DoubleAt(){	// {{{ D@ ( Daddr -- D ) Double at address(Double)
-	TRACE(F("D@"));
+	TRACE("D@");
 	push2(B4at(pop2()));
 	NEXT;
 }	// }}}
 void f_hex(){	// {{{
-	TRACE(F("hex"));
+	TRACE("hex");
 	BASE=16;
 	NEXT;
 }	// }}}
 void f_dec(){	// {{{
-	TRACE(F("dec"));
+	TRACE("dec");
 	BASE=10;
 	NEXT;
 }	// }}}
 void f_bin(){	// {{{
-	TRACE(F("bin"));
+	TRACE("bin");
 	BASE=2;
 	NEXT;
 }	// }}}
 // }}}
 DOUBLE_t cw2h(DOUBLE_t cw) {	// {{{ codeword address to head address
-	TRACE(F("cw2h"));
+	TRACE("cw2h");
 	if (!cw) return 0;
 	uint8_t i =0;
 	cw--;
@@ -518,13 +528,13 @@ DOUBLE_t cw2h(DOUBLE_t cw) {	// {{{ codeword address to head address
 	return 0;
 }	// }}}
 void f_cw2h() {	// {{{ ; ( cw -- h ) convert codeword address to head address
-	TRACE(F("f_cw2h"));
+	TRACE("f_cw2h");
 	push2(cw2h(pop2()));
 	NEXT;
 }	// }}}
 uint8_t show_name(DOUBLE_t cw) {	// {{{ show name and address from codeword - return flags
 	DOUBLE_t h=cw2h(cw);
-	if (!h) {ERROR(F("Not a word"));return 0;};
+	if (!h) {ERROR("Not a word");return 0;};
 	uint8_t flags,len;
 	flags=B1at(h+4);
 	len=B1at(h+5);
@@ -544,11 +554,11 @@ uint8_t show_name(DOUBLE_t cw) {	// {{{ show name and address from codeword - re
 	return flags;
 }	// }}}
 void show(DOUBLE_t cw) {	// {{{ ; ' WORD show - try to show definition of WORD
-	TRACE(F("show"));
+	TRACE("show");
 	DOUBLE_t h=cw2h(cw);
 	DOUBLE_t val;
 	uint8_t flags;
-	if (!h) {ERROR(F("Not a word"));return;};
+	if (!h) {ERROR("Not a word");return;};
 	show_name(cw);
 	write_eoln();
 	if (val_of_f_docol != B3at(cw)) return;	// neumim rozepsat
@@ -573,7 +583,7 @@ void show(DOUBLE_t cw) {	// {{{ ; ' WORD show - try to show definition of WORD
 
 }	// }}}
 void f_show() {	// {{{ ; ' WORD show - try to show definition of WORD
-	TRACE(F("show"));
+	TRACE("show");
 	DOUBLE_t cw=pop2();
 	show(cw);
 	NEXT;
@@ -583,59 +593,59 @@ void f_key(){	 // {{{ WAITS for char and puts it on stack
 	NEXT;
 }	// }}}
 void f_emit() { 	 // {{{ ; ( c -- ) emits character
-	TRACE(F("EMIT"));
+	TRACE("EMIT");
 	CELL_t c=pop();
 	write_char(c & 0xFF);
 	NEXT;
 }	// }}}
 void f_word() {	 // {{{ Put address and size of buff to stack
-	TRACE(F("WORD"));
+	TRACE("WORD");
 	get_word();
 	push2(B3U32(&word_buf));
 	push(word_buf_len);
 	NEXT;
 }	// }}}
 void f_docol() {	// {{{
-	INFO(F("f_docol"));
+	INFO("f_docol");
 //	track("f_docol ");
 // ERROR("Press ANY key to continue");wait_for_char();
 	Rpush(IP);
 	IP=DT+4;	// README: DT points to 4B codeword, so next address is DT+4B and now it is on Data[0] in the target header
-	DEBUG_DUMP(IP,("IP in f_docol	"));
-	DEBUG_DUMP(DT,("DT in f_docol	"));
+	DEBUG_DUMP(IP,"IP in f_docol	");
+	DEBUG_DUMP(DT,"DT in f_docol	");
 	NEXT;
 }	// }}}
 void f_exit(){	// {{{
-	INFO(F("f_exit"));
+	INFO("f_exit");
 	IP=Rpop();
 	NEXT;
 }	// }}}
 void f_lit(){	// {{{ README: LIT takes the next 4B pointer as 2B integer, ignores the top byte. This is done for taking the same 4B alingment in data
-	INFO(F("f_lit"));
+	INFO("f_lit");
 	push(B2at(IP));
 	IP+=4;
 	NEXT;
 }	// }}}
 void f_lit2(){	// {{{ README: LIT takes the next 4B pointer as 4B integer. This is done for taking the same 4B alingment in data
-	INFO(F("f_lit2"));
+	INFO("f_lit2");
 	push2(B4at(IP));
 	IP+=4;
 	NEXT;
 }	// }}}
 void comma(uint32_t d) {	// {{{
-	INFO(F("comma"));
+	INFO("comma");
 	*(uint32_t*)B3PTR(HERE)=d;
 	HERE+=4;
 }	// }}}
 /*
 void comma(Data_t d) {	// {{{
-	INFO(F("comma"));
+	INFO("comma");
 	*(Data_t*)HERE=d;
 	HERE+=4;
 }	// }}}
 */
 void f_comma() {	// {{{ take 3B address (2 CELLs) from datastack and put it to HERE
-	TRACE(F(","));
+	TRACE(",");
 	CELL_t c=pop();
 	*(CELL_t *)B3PTR(HERE)=c;
 	HERE+=2;
@@ -646,7 +656,7 @@ void f_comma() {	// {{{ take 3B address (2 CELLs) from datastack and put it to H
 }	// }}}
 	char buf[32];	// stack eating structures cannot be in NEXT-chained functions, or stack will overflow !!!
 void f_dot() { 	 // {{{
-	TRACE(F("."));
+	TRACE(".");
 	CELL_t c=pop();
 	itoa(c, buf, BASE);
 	write_str(&buf[0]);
@@ -654,7 +664,7 @@ void f_dot() { 	 // {{{
 }	// }}}
 
 void f_number() {	// {{{ (addr n -- val rest ) rest= #neprevedenych znaku
-	TRACE(F("NUMBER"));
+	TRACE("NUMBER");
 	CELL_t i=pop();
 	char *buf=(char *)pop();
 	char *end;CELL_t c=strtoul(buf,&end,BASE);
@@ -662,22 +672,22 @@ void f_number() {	// {{{ (addr n -- val rest ) rest= #neprevedenych znaku
 	NEXT;
 }	// }}}
 void f_branch(){ 	 // {{{
-	TRACE(F("BRANCH"));
+	TRACE("BRANCH");
 	int16_t c=B2at(IP);
 	int32_t cc=4*c;
 	IP+=cc;
 	NEXT;
 }	// }}}
 void f_tick() {	// {{{ ; push CW_address of next word to stack (and skip it)
-	TRACE(F("'"));
+	TRACE("'");
 	if (STATE == st_executing) { // st_executing
-	INFO(F("st_executing"));
+	INFO("st_executing");
 		get_word();
 		xpHead1 h=findHead(word_buf_len,&word_buf[0],B3PTR(LAST));
 //		write_hex32(B3U32(h));
 		push2(get_codeword_addr(h));
 	} else {
-	INFO(F("st_compiling"));
+	INFO("st_compiling");
 		int32_t c=B2at(IP);
 		IP+=4;
 		push2(c);
@@ -685,13 +695,13 @@ void f_tick() {	// {{{ ; push CW_address of next word to stack (and skip it)
 	NEXT;
 }	// }}}
 void f_immediate() {	// {{{ ; Addr_of_header IMMEDIATE make the word immediate
-	TRACE(F("IMMEDIATE"));
+	TRACE("IMMEDIATE");
 	uint32_t h=pop2();
 	*(uint8_t *)B3PTR(h+4) |= FLG_IMMEDIATE;
 	NEXT;
 }	// }}}
 void f_0branch(){ 	 // {{{	; branch if zero
-	TRACE(F("0BRANCH"));
+	TRACE("0BRANCH");
 	int16_t c=B2at(IP);
 	if ( pop()) c=1;
 	int32_t cc=4*c;
@@ -699,37 +709,57 @@ void f_0branch(){ 	 // {{{	; branch if zero
 	NEXT;
 }	// }}}
 void f_zero() {	// {{{ ; true if zero
-	TRACE(F("==0"));
-	push(pop()==0?F_TRUE:F_FALSE);
+	TRACE("==0");
+	push((pop()==0)?F_TRUE:F_FALSE);
 	NEXT;
 }	// }}}
-void f_not() {	// {{{ ; true if not zero
-	TRACE(F("!=0"));
-	push(pop()!=0?F_FALSE:F_TRUE);
+void f_notzero() {	// {{{ ; true if not zero
+	TRACE("!=0");
+	push((pop()!=0)?F_FALSE:F_TRUE);
 	NEXT;
 }	// }}}
 void f_positive() {	// {{{ ; true if positive
-	TRACE(F(">0"));
-	push(pop()>0?F_TRUE:F_FALSE);
+	TRACE(">0");
+	push((pop()>0)?F_TRUE:F_FALSE);
 	NEXT;
 }	// }}}
 void f_positive0() {	// {{{ ; true if positive or zero
-	TRACE(F(">=0"));
-	push(pop()>=0?F_TRUE:F_FALSE);
+	TRACE(">=0");
+	push((pop()>=0)?F_TRUE:F_FALSE);
 	NEXT;
 }	// }}}
 void f_negative() {	// {{{ ; true if negative
-	TRACE(F("<0"));
-	push(pop()<0?F_TRUE:F_FALSE);
+	TRACE("<0");
+	push((pop()<0)?F_TRUE:F_FALSE);
 	NEXT;
 }	// }}}
 void f_negative0() {	// {{{ ; true if negative or zero
-	TRACE(F("<=0"));
-	push(pop()<=0?F_TRUE:F_FALSE);
+	TRACE("<=0");
+	push((pop()<=0)?F_TRUE:F_FALSE);
+	NEXT;
+}	// }}}
+void f_notequal() {	// {{{ ; (c1 c2 -- flag ) true if notequal
+	INFO("f_notequal");
+	push((pop()==pop())?F_TRUE:F_FALSE);
+	NEXT;
+}	// }}}
+void f_notequalD() {	// {{{ ; (d1 d2 -- flag ) true if notequal
+	INFO("f_notequalD");
+	push((pop2()==pop2())?F_TRUE:F_FALSE);
+	NEXT;
+}	// }}}
+void f_equal() {	// {{{ ; (c1 c2 -- flag ) true if equal
+	INFO("f_equal");
+	push((pop()==pop())?F_TRUE:F_FALSE);
+	NEXT;
+}	// }}}
+void f_equalD() {	// {{{ ; (d1 d2 -- flag ) true if equal
+	INFO("f_equalD");
+	push((pop2()==pop2())?F_TRUE:F_FALSE);
 	NEXT;
 }	// }}}
 void f_interpret(){	 // {{{
-	INFO(F("f_interpret"));
+	INFO("f_interpret");
 //	write_str(F("\r\n"));
 	DEBUG_DUMP(B3U32(&Rstck[Rstack]),("Rstack	"));
 	DEBUG_DUMP(B3U32(&stck[stack]),("stack	"));
@@ -738,7 +768,7 @@ void f_interpret(){	 // {{{
 	for (int8_t p=0;p<stack;p++) {write_char('[');write_hex16(stck[p]);write_char(']');};
 	write_str(F(PROMPT));
 	get_word();
-	INFO(F(" got: "));info(&word_buf[0]);
+	INFO(" got: ");info(&word_buf[0]);
 	xpHead1 h=findHead(word_buf_len,&word_buf[0],B3PTR(LAST));
 //	write_str(" head found? ");
 //	DEBUG_DUMP((cmvp)h,"head?");
@@ -747,7 +777,7 @@ void f_interpret(){	 // {{{
 		if ((STATE==st_executing) || (h->flags & FLG_IMMEDIATE)) {
 //			DEBUG_DUMP(get_codeword_addr(h),"jump to	");
 			DT=get_codeword_addr(h);
-			INFO(F("jmp_indirect_24"));
+			INFO("jmp_indirect_24");
 			jmp_indirect_24(get_codeword_addr(h));
 			return; 	// NEXT is in called function
 		} else {
@@ -768,30 +798,30 @@ void f_interpret(){	 // {{{
 			};
 		} else {
 			// it is not
-			ERROR(F("What?"));error(&word_buf[0]);
+			ERROR("What?");error(&word_buf[0]);
 		}
 	};
-	INFO(F("end of f_interpret"));
+	INFO("end of f_interpret");
 	NEXT;
 	
 	// XXX
 }	// }}}
 void f_debug(void) {	// {{{ // === f_debug: return from FOTH or what ===
-	ERROR(F("f_debug"));
+	ERROR("f_debug");
 	// f_next();	// No, simply no, return back to caler ...
 }	// }}}
 void f_doconst() {	// {{{
-	INFO(F("f_doconst"));
+	INFO("f_doconst");
 	push(B4at(DT+4));
 	NEXT;
 }	// }}}
 void f_doconst2() {	// {{{
-	INFO(F("f_doconst2"));
+	INFO("f_doconst2");
 	push2(B4at(DT+4));
 	NEXT;
 }	// }}}
 void print_words(void) {	// {{{ // === print all wocabulary
-	INFO(F("print_words"));
+	INFO("print_words");
 	xpHead1 h=B3PTR(LAST);
 	while (h) {
 		if (h->flags & FLG_HIDDEN) write_str(F(CLR_GREY));
@@ -805,12 +835,12 @@ void print_words(void) {	// {{{ // === print all wocabulary
 	write_eoln();
 }	// }}}
 void f_words(void) {	// {{{ print all words
-	TRACE(F("WORDS"));
+	TRACE("WORDS");
 	print_words();
 	NEXT;
 }	// }}}
 void f_dump() {	// {{{ ; ( Addr -- ) dump
-	TRACE(F("dump"));
+	TRACE("dump");
 	uint32_t addr=pop2();
 	bool d=nodebug;
 	nodebug=false;
@@ -820,58 +850,58 @@ void f_dump() {	// {{{ ; ( Addr -- ) dump
 	NEXT;
 }	// }}}
 void f_nodebug() {	// {{{ ; nodebug
-	TRACE(F("nodebug"));
+	TRACE("nodebug");
 	nodebug=(0!=pop());
 	NEXT;
 }	// }}}
 void f_noinfo() {	// {{{ ; noinfo
-	TRACE(F("noinfo"));
+	TRACE("noinfo");
 	noinfo=(0!=pop());
 	NEXT;
 }	// }}}
 void f_notrace() {	// {{{ ; notrace
-	TRACE(F("notrace"));
+	TRACE("notrace");
 	notrace=(0!=pop());
 	NEXT;
 }	// }}}
 // {{{ more primitives
 void f_create(void) {	// {{{ create header of new word
-	ERROR(F("f_create"));
+	ERROR("f_create");
 	uint32_t temp_h=HERE;
 	*(uint32_t*)B3PTR(HERE)=LAST; HERE+=4;		// 4B next ptr
 	*(uint8_t*)B3PTR(HERE) =0;HERE++;			// 1B attr
 	uint8_t len=pop();
 	*(uint8_t*)B3PTR(HERE) =len;HERE++;				// 1B len "words"
 //	strncpy_PF((char*)B3PTR(HERE),B3PTR(pop2()),len); HERE+=len;// len Bytes (+\0, but we overwrite it next step)
-	DEBUG_DUMP(peek2(),("from buff	"));
-	DEBUG_DUMP((HERE),("HERE	"));
+	DEBUG_DUMP(peek2(),"from buff	");
+	DEBUG_DUMP(HERE,"HERE	");
 	uint32_t from=pop2();
 	// strncpy_PF((char*)B3PTR(HERE),pop2(),len); HERE+=len;// len Bytes (+\0, but we overwrite it next step)
 	for (uint8_t i=0; i<len;i++){
 		*(uint8_t*)B3PTR(HERE++) =*(uint8_t*)B3PTR(from++);
 	};
-	DEBUG_DUMP((HERE),("HERE	"));
+	DEBUG_DUMP(HERE,"HERE	");
 	LAST=temp_h;
 	NEXT;
 }	// }}}
 void f_right_brac() {	// {{{ ; ] goes to compile mode
-	TRACE(F("]"));
+	TRACE("]");
 	STATE=st_compiling;
 	NEXT;
 }	// }}}
 void f_left_brac() {	// {{{ [ goes to immediate mode
-	TRACE(F("["));
+	TRACE("[");
 	STATE=st_executing;
 	NEXT;
 }	// }}}
 void f_hidden() {	// {{{ ; Addr_of_header HIDDEN hide/unhide the word
-	TRACE(F("HIDDEN"));
+	TRACE("HIDDEN");
 	uint32_t addr=pop2() + 4;	// flags
 	*(uint8_t *)B3PTR(addr) = B1at(addr) ^ FLG_HIDDEN;
 	NEXT;
 }	// }}}
 void f_find() {	// {{{ ; WORD FIND return Addr_of_header (or 0 0 )
-	TRACE(F("FIND"));
+	TRACE("FIND");
 	uint8_t len=pop();
 	uint32_t addr=pop2();
 	xpHead1 h=findHead(len,B3PTR(addr),B3PTR(LAST));
@@ -888,7 +918,7 @@ void my_setup(){	// {{{
 	RAM[1]='>';
 	RAM[2]='>';
 	LAST=B3U32(&top_head);
-	ERROR(F("Test"));
+	ERROR("Test");
 	uint32_t temp_h=HERE;
 	*(uint32_t*)B3PTR(HERE)=LAST; HERE+=4;		// 3B next ptr
 	*(uint8_t*)B3PTR(HERE) =0;HERE++;			// 1B attr
@@ -899,32 +929,32 @@ void my_setup(){	// {{{
 	*(uint32_t*)B3PTR(HERE)=cw * 2; HERE+=4;	// codeword
 	LAST=temp_h;
 // --------------------------------------------------------------------------------
-	DEBUG_DUMP(B3U32(&RAM[0]),("RAM	"));
-	DEBUG_DUMP((HERE),("HERE	"));
-	DEBUG_DUMP(LAST,("LAST	"));
+	DEBUG_DUMP(B3U32(&RAM[0]),"RAM	");
+	DEBUG_DUMP(HERE,"HERE	");
+	DEBUG_DUMP(LAST,"LAST	");
 // --------------------------------------------------------------------------------
-	ERROR(F("my_setup"));
+	ERROR("my_setup");
 	IP = B3U32(&w_test_data);
-	DEBUG_DUMP(IP,("IP\t"));
-	DEBUG_DUMP(val_of_f_docol,("val_of_f_docol"));
-	DEBUG_DUMP(val_of_w_exit_cw,("val_of_w_exit_cw"));
+	DEBUG_DUMP(IP,"IP\t");
+	DEBUG_DUMP(val_of_f_docol,"val_of_f_docol");
+	DEBUG_DUMP(val_of_w_exit_cw,"val_of_w_exit_cw");
 	push(0x21);
 	print_words();
 	NEXT;
 	pop();
 // --------------------------------------------------------------------------------
-	ERROR(F("Full run"));
+	ERROR("Full run");
 	IP = B3U32(&w_quit_data);
-	DEBUG_DUMP(IP,("IP\t"));
-	DEBUG_DUMP(B3U32(&f_docol),("&f_docol"));
+	DEBUG_DUMP(IP,"IP\t");
+	DEBUG_DUMP(B3U32(&f_docol),"&f_docol");
 	Rpush(IP);
 	IP=B3U32(&f_docol);
-	DEBUG_DUMP(IP,("(cmvp)&f_docol"));
+	DEBUG_DUMP(IP,"B3U32(&f_docol)");
 	IP=Rpop();
 	
 	NEXT;
 // --------------------------------------------------------------------------------
-	ERROR(F("the end"));
+	ERROR("the end");
 	while(1){;};
 
 };	// }}}

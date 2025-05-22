@@ -9,9 +9,9 @@
 #include "flags.h"
 #include "ptr24.h"
 #include "io.h"
-#define ERROR(X) error(X)
-#define INFO(X) info(X)
-#define TRACE(X) trace(X)
+#define ERROR(X) error(F(X))
+#define INFO(X) info(F(X))
+#define TRACE(X) trace(F(X))
 // #define DEBUG_DUMPp(P,LBL) debug_dump(B3U32(P),F(LBL));
 // #define DEBUG_DUMP(U,LBL) debug_dump(U,F(LBL));
 

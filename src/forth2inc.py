@@ -84,7 +84,10 @@ fout=0
 glob_middle=""
 def out( left, right):
 	global args,fout,glob_middle
-	tab = -7 if left[0]=='\t' else 0
+	tab = 0
+	if len(left):
+		if left[0]=='\t':
+			tab = -7
 	if (len(left) or len(right)):
 		fout.write(f"{left:<{args.col+tab}}")
 		if len(right):
