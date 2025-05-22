@@ -44,7 +44,7 @@ void setup(){
 	bios <<(F(": count- 0 BEGIN DUP c2C PORTF !C PORTK !C 1- DUP ==0 UNTIL c2C PORTF !C PORTK !C ; \r\n"));
 	bios <<(F(": count+ 0 BEGIN DUP c2C PORTF !C PORTK !C 1 + DUP ==0 UNTIL c2C PORTF !C PORTK !C ; \r\n"));
 #endif
-	bios <<(F("Test: : xx 0BRANCH [ 0 3 , ] 5 ; : xxx IF 1111 ELSE 2222 FI 3333 + ; \r\n")); 
+	bios <<(F("Test: : xx 0BRANCH [ 0 0C , ] 0 ; : xxx IF 1111 ELSE 2222 FI 3333 + ; \r\n")); 
 	bios << F(
 	STR_2LESS "<" // '«'
 	STR_2MORE ">" // '»'

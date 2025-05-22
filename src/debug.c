@@ -2,11 +2,9 @@
 // ,,g = gcc, exactly one space after "set"
 #include "debug.h"
 bool nodebug=true;
-//bool nodebug=false;
 bool noinfo=true;
-//bool noinfo=false;
-//bool notrace=true;
-bool notrace=false;
+bool notrace=true;
+//bool nodebug=false;
 //
 extern void write_char(char c);
 extern void write_charA(char c);
@@ -56,20 +54,43 @@ void write_hex32(uint32_t w) {
 	write_hex8(w & 0xFF);
 }
 // }}}
-
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__)
 #define RAM_START     ((uint32_t)0x800100)
 #define RAM_END       ((uint32_t)0x810000)
 #define FLASH_START   ((uint32_t)0x000000)
 #define FLASH_END     ((uint32_t)0x040000)
 
-bool is_ram_address(uint32_t addr) {	 // {{{
-	return addr >= RAM_START && addr < RAM_END;
+bool is_in_range(uint32_t addr) {	 // {{{
+	return	((addr >= RAM_START)	&& (addr < RAM_END)) ||
+		((addr >= FLASH_START)	&& (addr < FLASH_END));
 }	// }}}
 
-bool is_flash_address(uint32_t addr) {	 // {{{
-	return ((addr >= FLASH_START) && (addr < FLASH_END));
-}	// }}}
+#elif defined(__PC__)
+ #include <stdio.h>
 
+bool is_in_range(uintptr_t addr /* void *addr*/) {
+    FILE *fp = fopen("/proc/self/maps", "r");
+    if (!fp) return false;
+
+    uintptr_t target = (uintptr_t)addr;
+    char line[256];
+
+    while (fgets(line, sizeof(line), fp)) {
+        long unsigned int start, end;
+        char perms[5];
+
+        if (sscanf(line, "%lx-%lx %4s", &start, &end, perms) == 3) {
+            if ((target >= start && target < end) && perms[0] == 'r') {
+                fclose(fp);
+                return true;
+            }
+        }
+    }
+
+    fclose(fp);
+    return false;
+}
+#endif
 static inline uint8_t read_memx(uint32_t addr) {	 // {{{
 	ptr24_u x; x.u32=addr;
 	return *(volatile const __memx uint8_t*)x.p24;
@@ -91,9 +112,8 @@ void debug_dump(uint32_t address, const __memx char* label) {	 // {{{
 	for (uint8_t i = 0; i < 3*16; ++i) {
 		if( i==16 || i==32 ) write_str(F(" | "));
 		uint32_t curr = start + i;
-		bool in_range = is_ram_address(curr) || is_flash_address(curr);
 		if (curr == addr) write_str(F(BG_GREEN STR_2LESS));
-		if (in_range) { write_hex8(read_memx(curr));
+		if (is_in_range(curr) ){ write_hex8(read_memx(curr));
 		} else { write_str(F("  ")); };
 		if (curr == addr) {
 			write_str(F(STR_2MORE CLR_RESET));
@@ -109,13 +129,8 @@ void debug_dump(uint32_t address, const __memx char* label) {	 // {{{
 	for (uint8_t i = 0; i < 3*16; ++i) {
 		if( i==16 || i==32 ) write_str(F("' | '"));
 		uint32_t curr = start + i;
-		bool in_range = is_ram_address(curr) || is_flash_address(curr);
-
-		if (in_range) {
-			c = read_memx(curr);
-		} else {
-			c = ' ';
-		}
+		if (is_in_range(curr) ){ c = read_memx(curr);
+		} else { c = ' '; };
 
 		if (curr == addr) {
 			write_str(F(BG_GREEN STR_2LESS));

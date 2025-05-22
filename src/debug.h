@@ -2,7 +2,9 @@
 #define DEBUG_H
 
 #include <stdint.h>
-#include <avr/pgmspace.h>
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__)
+	#include <avr/pgmspace.h>
+#endif
 #include <stdbool.h>
 #include "defines.h"
 #include "colors.h"

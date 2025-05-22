@@ -1,7 +1,7 @@
 : QUIT						\ DEFWORD w_quit,0,"QUIT",f_docol ( "quit" )
 	INTERPRET				\	.long w_interpret_cw
 	BRANCH					\	.long w_branch_cw
-	\'-2					\ .long -2
+	\'-8					\ .long -8
 	;
 
 : HIDE						\ DEFWORD w_hide, 0, "HIDE", f_docol		; HIDE WORD hide/unhide the word
@@ -24,7 +24,7 @@
 	;					\	.long w_exit_cw
 
 : FI IMMEDIATE					\ DEFWORD w_fi, FLG_IMMEDIATE, "FI", f_docol		; fi - end of IF
-	DUP2 HERE D@ SWAP2 -D /4D SWAP2 !D ;	\	.long w_dup_D_cw, var_HERE_cw, w_DoubleAt_cw, w_swap_D_cw, w_minus_D_cw, w_div4_D_cw, w_swap_D_cw,w_StoreDouble_cw,w_exit_cw
+	DUP2 HERE D@ SWAP2 -D SWAP2 !D ;	\	.long w_dup_D_cw, var_HERE_cw, w_DoubleAt_cw, w_swap_D_cw, w_minus_D_cw, w_swap_D_cw,w_StoreDouble_cw,w_exit_cw
 
 : THEN IMMEDIATE				\ DEFWORD w_then, FLG_IMMEDIATE, "THEN", f_docol		; fi - end of IF
 	FI ;					\	.long w_fi_cw, w_exit_cw
@@ -39,7 +39,7 @@
 
 : UNTIL IMMEDIATE 				\ DEFWORD w_until, FLG_IMMEDIATE, "UNTIL", f_docol	; BEGIN loop-part condition UNTIL
 	' 0BRANCH ,				\	.long w_tick_cw, w_0branch_cw,w_comma_cw
-	HERE D@ -D /4D ,			\	.long var_HERE_cw, w_DoubleAt_cw, w_minus_D_cw, w_div4_D_cw, w_comma_cw
+	HERE D@ -D ,				\	.long var_HERE_cw, w_DoubleAt_cw, w_minus_D_cw, w_comma_cw
 	;					\	.long w_exit_cw
 
 : WHILE IMMEDIATE				\ DEFWORD w_while, FLG_IMMEDIATE, "WHILE", f_docol	; BEGIN condition WHILE loop-part REPEAT
@@ -48,9 +48,9 @@
 : REPEAT IMMEDIATE 				\ BEGIN condition WHILE loop-part REPEAT
 	' BRANCH ,				\ compile BRANCH
 	SWAP2					\ get the original offset (from BEGIN)
-	HERE D@ -D /4D ,			\ and compile it after BRANCH
+	HERE D@ -D ,				\ and compile it after BRANCH
 	SWAP2
-	HERE D@ SWAP2 -D /4D			\ calculate the offset2
+	HERE D@ SWAP2 -D			\ calculate the offset2
 	SWAP2 !D ;				\ and back-fill it in the original location
 
 : FORGET					\ DEFWORD w_forget,0,"FORGET",f_docol			; forget word (and all after)

@@ -5,8 +5,9 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <avr/pgmspace.h>
-// #include "4.test.0001.def"
+#ifdef __PC__
+#include "itoa.h"
+#endif
 #include "flags.h"
 #include "ptr24.h"
 #include "io.h"
@@ -26,7 +27,13 @@ extern void jmp_indirect_24(uint32_t p);		// asm.S	call function, which byte_add
  */
 
 _Static_assert(sizeof(uint32_t) == 4, "uint32_t must be 32 bits");
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__)
 _Static_assert(sizeof(const __memx void *) == 3, "const __memx void * must be 24 bits");
+#elif defined(__PC__)
+_Static_assert(sizeof(const __memx void *) == 4, "const __memx void * must be 32 bits");
+#else
+#error undefined
+#endif
 
 /** {{{ Intro
  * Lets start programming FORTH
@@ -84,7 +91,9 @@ typedef const __memx CodeWord_t (*Data_t);	// Data_t is 3B pointer to CodeWord_t
 typedef const __memx char *xpC;	// 3B pointer 1B target	pointer "somewhere" to char "somewhere"
 typedef struct head1_t {	// {{{
 	const __memx struct head1_t *next;		// 3B: pointer to next header "somewhere"
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__)
 	uint8_t fill; // to 4B pointer
+#endif
 	uint8_t flags;		// 1B:
 	uint8_t len;		// 1B: up to 31 (=5bits)
 	const char name[];	// len B:name of WORD
@@ -134,11 +143,13 @@ extern const __memx BYTE_t		w_quit_cw;
 extern const __memx BYTE_t		w_exit_cw;
 extern const __memx BYTE_t		w_double;
 extern const __memx char w_test_data;
+extern const __memx char w_test_cw;
 extern const __memx char w_quit_data;
 extern const __memx DOUBLE_t		val_of_w_exit_cw;
 extern const __memx DOUBLE_t		val_of_f_docol;
 
-#define NEXT f_next()
+#define NEXT
+//#define NEXT f_next()
 //void f_next() __attribute__((noreturn));
 void f_next(){
 	INFO("f_next");
@@ -151,6 +162,23 @@ DEBUG_DUMP(IP,"IP new	");
 DEBUG_DUMP(DT,"DT new	");
 DEBUG_DUMP(B3at(DT),"*DT	");
 	jmp_indirect_24(DT);
+}
+void forth_loop(uint32_t cw_addr) {
+	INFO("Start of loop");
+	uint32_t fake[2];
+	fake[0]=cw_addr;
+	fake[1]=B3U32(NULL);
+	IP=B3U32(&fake[0]);
+	while ( (IP!=B3U32(NULL)) && ( (DT=B4at(IP)) !=B3U32(NULL)) ) {
+		DT=B4at(IP);
+		DEBUG_DUMP(IP,"IP:	");
+		DEBUG_DUMP(DT,"DT:	");
+		IP+=4;
+		jmp_indirect_24(DT);
+//		((void (*)(void))B4at(DT))();
+//		((void (*)(void))B3PTR(B4at(DT)))();
+	};
+	INFO("End of loop");
 }
 
 // {{{ pop ...
@@ -301,7 +329,13 @@ uint32_t get_codeword_addr(xpHead1 h){	 // {{{ // Data_t
 // }}}
 
 void f_docol(); 	// FORWARD
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__)
 #define VARfn(name)	void push_var_##name(){TRACE(#name);push(0x80);push((CELL_t)((uint16_t)(&name)));NEXT;}
+#elif defined(__PC__)
+#define VARfn(name)	void push_var_##name(){TRACE(#name);push2(((uint32_t)(&name)));NEXT;}
+#else
+#error undefined
+#endif
 #define VAR(name,value)	CELL_t name=(CELL_t)value;VARfn(name)
 #define CONST(name,value)	void push_const_##name(){TRACE(#name);push(value); NEXT;}
 #define CONST2(name,value)	void push_const_##name(){TRACE(#name);push2(value); NEXT;}
@@ -663,19 +697,18 @@ void f_dot() { 	 // {{{
 	NEXT;
 }	// }}}
 
-void f_number() {	// {{{ (addr n -- val rest ) rest= #neprevedenych znaku
+void f_number() {	// {{{ (Daddr n -- val rest ) rest= #neprevedenych znaku
 	TRACE("NUMBER");
 	CELL_t i=pop();
-	char *buf=(char *)pop();
+	char *buf=(char *)B3PTR(pop2());
 	char *end;CELL_t c=strtoul(buf,&end,BASE);
 	push(c);push(i-(end-buf));
 	NEXT;
 }	// }}}
-void f_branch(){ 	 // {{{
+void f_branch(){ 	 // {{{ BRANCH .long offset ; offset -4 loop; offset +4 nop;
 	TRACE("BRANCH");
-	int16_t c=B2at(IP);
-	int32_t cc=4*c;
-	IP+=cc;
+	int32_t c=B4at(IP);
+	IP+=c;
 	NEXT;
 }	// }}}
 void f_tick() {	// {{{ ; push CW_address of next word to stack (and skip it)
@@ -688,7 +721,7 @@ void f_tick() {	// {{{ ; push CW_address of next word to stack (and skip it)
 		push2(get_codeword_addr(h));
 	} else {
 	INFO("st_compiling");
-		int32_t c=B2at(IP);
+		int32_t c=B4at(IP);
 		IP+=4;
 		push2(c);
 	};
@@ -700,12 +733,11 @@ void f_immediate() {	// {{{ ; Addr_of_header IMMEDIATE make the word immediate
 	*(uint8_t *)B3PTR(h+4) |= FLG_IMMEDIATE;
 	NEXT;
 }	// }}}
-void f_0branch(){ 	 // {{{	; branch if zero
+void f_0branch(){ 	 // {{{	; branch if zero; 0BRANCH .long offset ; offset -4 loop; offset +4 nop;
 	TRACE("0BRANCH");
-	int16_t c=B2at(IP);
-	if ( pop()) c=1;
-	int32_t cc=4*c;
-	IP+=cc;
+	int32_t c=B4at(IP);
+	if ( pop()) c=4;
+	IP+=c;
 	NEXT;
 }	// }}}
 void f_zero() {	// {{{ ; true if zero
@@ -775,11 +807,12 @@ void f_interpret(){	 // {{{
 	if (h!=NULL) { // WORD
 //		write_str("yes");
 		if ((STATE==st_executing) || (h->flags & FLG_IMMEDIATE)) {
-//			DEBUG_DUMP(get_codeword_addr(h),"jump to	");
+			DEBUG_DUMP(get_codeword_addr(h),"jump to	");
 			DT=get_codeword_addr(h);
 			INFO("jmp_indirect_24");
 			jmp_indirect_24(get_codeword_addr(h));
 			return; 	// NEXT is in called function
+//			((void (*)(void))B4at(get_codeword_addr(h)))();
 		} else {
 			comma(get_codeword_addr(h));
 		};
@@ -911,7 +944,11 @@ void f_find() {	// {{{ ; WORD FIND return Addr_of_header (or 0 0 )
 // }}}
 const __flash char f_words_name[]="WORDS2";
 void my_setup(){	// {{{
+	notrace=false;
+	noinfo=false;
 	nodebug=false;
+	notrace=true;
+	noinfo=true;
 	nodebug=true;
 	HERE=B3U32(&RAM[0]);
 	RAM[0]='>';
@@ -925,13 +962,22 @@ void my_setup(){	// {{{
 	uint8_t len=strlen_P(f_words_name);
 	*(uint8_t*)B3PTR(HERE) =len;HERE++;				// 1B len "words"
 	strcpy_P((char*)B3PTR(HERE),f_words_name); HERE+=len;// len Bytes (+\0, but we overwrite it next step)
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__)
 	uint16_t cw=(uint16_t)&f_words;
 	*(uint32_t*)B3PTR(HERE)=cw * 2; HERE+=4;	// codeword
+#elif defined(__PC__)
+	uint32_t cw=(uint32_t)&f_words;
+	*(uint32_t*)B3PTR(HERE)=cw; HERE+=4;	// codeword
+#else
+#error undefined
+#endif
 	LAST=temp_h;
 // --------------------------------------------------------------------------------
 	DEBUG_DUMP(B3U32(&RAM[0]),"RAM	");
-	DEBUG_DUMP(HERE,"HERE	");
-	DEBUG_DUMP(LAST,"LAST	");
+	DEBUG_DUMPp(&HERE,"HERE	");
+	DEBUG_DUMP(HERE,"*HERE	");
+	DEBUG_DUMPp(&LAST,"LAST	");
+	DEBUG_DUMP(LAST,"*LAST	");
 // --------------------------------------------------------------------------------
 	ERROR("my_setup");
 	IP = B3U32(&w_test_data);
@@ -940,8 +986,9 @@ void my_setup(){	// {{{
 	DEBUG_DUMP(val_of_w_exit_cw,"val_of_w_exit_cw");
 	push(0x21);
 	print_words();
-	NEXT;
-	pop();
+//	NEXT;
+	forth_loop(B3U32(&w_test_cw));
+	write_hex16(pop());
 // --------------------------------------------------------------------------------
 	ERROR("Full run");
 	IP = B3U32(&w_quit_data);
@@ -952,10 +999,16 @@ void my_setup(){	// {{{
 	DEBUG_DUMP(IP,"B3U32(&f_docol)");
 	IP=Rpop();
 	
-	NEXT;
+	forth_loop(B3U32(&w_quit_cw));
+//	NEXT;
 // --------------------------------------------------------------------------------
 	ERROR("the end");
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__)
 	while(1){;};
+#elif defined(__PC__)
+#else
+#error undefined
+#endif
 
 };	// }}}
 void my_loop(){	// {{{
