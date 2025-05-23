@@ -6,6 +6,7 @@
 #endif
 
 #include "flags.h"
+#include "defines.h"
 	.section .text
 
 	.global here
@@ -360,6 +361,11 @@ DEFVAR STATE
 DEFVAR BASE
 DEFCONST2 DOCOL,f_docol
 DEFCONST2 RAM,RAM
+DEFCONST2 RAM_END,RAM+RAM_LEN
+DEFCONST2 S0,stck
+DEFCONST2 S_END,stck+STACK_LEN*2	// sizeof(CELL_t)
+DEFCONST2 R0,Rstck
+DEFCONST2 R_END,Rstck+RSTACK_LEN*4	// sizeof(PTR_t)
 DEFWORD w_lit,	FLG_ARG,	"LIT",	f_lit
 DEFWORD w_lit2,	FLG_ARG,	"LIT2",	f_lit2
 DEFWORD w_Store,	0,	"!",	f_Store
@@ -368,6 +374,16 @@ DEFWORD w_StoreDouble,	0,	"!D",	f_StoreDouble
 DEFWORD w_At,   	0,	"@",	f_At
 DEFWORD w_CharAt,	0,	"C@",	f_CharAt
 DEFWORD w_DoubleAt,	0,	"D@",	f_DoubleAt
+DEFWORD w_ToR,		0,	">R",	f_ToR		// ( u -- ; R: -- r ) Move to Rstack
+DEFWORD w_DoubleToR,	0,	"D>R",	f_DoubleToR	// ( D -- ; R: -- r ) Move Double to Rstack (still one position on R)
+DEFWORD w_FromR,	0,	"R>",	f_FromR		// ( -- u ; R: r -- ) Move from Rstack
+DEFWORD w_DoubleFromR,	0,	"R>D",	f_DoubleFromR	// ( -- D ; R: r -- ) Move Double from Rstack (still one position on R)
+DEFWORD w_CellAtR,	0,	"@R",	f_CellAtR	// ( -- u ; R: r -- r ) Peek from Rstack
+DEFWORD w_DoubleAtR,	0,	"D@R",	f_DoubleAtR	// ( -- D ; R: r -- r ) Peek from Rstack
+DEFWORD w_StackAddress,	0,	"S?",	f_StackAddress	// ( -- D ) Address, where Stack points
+DEFWORD w_SetStack,	0,	"S!",	f_SetStack	// ( D -- ?? ) Set Stack Address
+DEFWORD w_RStackAddress,	0,	"R?",	f_RStackAddress	// ( -- D ) Address, where Rstack points
+DEFWORD w_SetRStack,	0,	"R!",	f_SetRStack	// ( D -- R: ?? ) Set Rstack Address
 DEFWORD w_dup,  	0,	"DUP",	f_dup
 DEFWORD w_drop, 	0,	"DROP",	f_drop
 DEFWORD w_swap, 	0,	"SWAP",	f_swap
@@ -427,6 +443,7 @@ DEFWORD w_dec,  	0,	"dec",	f_dec
 DEFWORD w_bin,  	0,	"bin",	f_bin
 DEFWORD w_cw2h, 	0,	"cw2h",	f_cw2h		// ( cw -- h ) convert codeword address to head address
 DEFWORD w_show, 	0,	"show",	f_show		// ( cw -- ) show  try to show definition of WORD addressed by codeword
+DEFWORD w_export, 	0,	"export",	f_export	// ( cw -- ) export  try to export definition of WORD addressed by codeword for forth2inc.py
 DEFCONST1 ff,	0xFF
 DEFCONST1 aa,	0xAA
 # -------------------------------------------------------------------------------- more primitives

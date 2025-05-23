@@ -31,4 +31,16 @@
 	#warning "Unknown target OUTPUT_TARGET"
 #endif
 
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__)
+	#define RAM_LEN 	320	// word ~ 10B + name + 4 * words called - for start some 10 words should be enought
+	#define STACK_LEN	10
+	#define RSTACK_LEN	10
+#elif defined(__PC__)
+	#define RAM_LEN 	32000	// 32k should be enought for anyone :)
+	#define STACK_LEN	40
+	#define RSTACK_LEN	40
+#else
+#error undefined
+#endif
+
 #endif

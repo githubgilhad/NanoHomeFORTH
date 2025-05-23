@@ -1,4 +1,4 @@
 #pragma once
-#define VERSION_STRING "0.0.1-6-g6e1e83f++"
-#define VERSION_COMMIT "6e1e83f"
-#define VERSION_MESSAGE "forth2inc.py words.4th FORGET fixed"
+#define VERSION_STRING "0.0.1-7-gbff27d8++"
+#define VERSION_COMMIT "bff27d8"
+#define VERSION_MESSAGE "BRANCH offset is in bytes, not in cells"

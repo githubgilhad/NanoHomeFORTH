@@ -114,8 +114,6 @@ PTR_t		DT;	// NEXT is **(IP++)() - so DT=*IP as internal step. DT is value of la
  *   also lets start with small value, so it can be tested for both under- and over- flow
  *   also let push grow up and pop go down and 0 is empty stack (so push(x){stck[stack++]=x;}
  */
-#define STACK_LEN	10
-#define RSTACK_LEN	10
 CELL_t		stck[STACK_LEN];
 uint16_t	stack=0;
 PTR_t		Rstck[RSTACK_LEN];
@@ -126,7 +124,6 @@ uint16_t	Rstack=0;
  * now let it be just small array too
  * and test it until all works
  */
-#define RAM_LEN 	320	// word ~ 10B + name + 4 * words called - for start some 10 words should be enought
 uint8_t RAM[RAM_LEN];
 uint32_t HERE;
 //const __memx uint8_t *HERE;
@@ -151,7 +148,7 @@ extern const __memx DOUBLE_t		val_of_f_docol;
 #define NEXT
 //#define NEXT f_next()
 //void f_next() __attribute__((noreturn));
-void f_next(){
+void f_next(){	// {{{
 	INFO("f_next");
 	DT=B3at(IP);
 DEBUG_DUMP(IP,"IP old	");
@@ -162,8 +159,8 @@ DEBUG_DUMP(IP,"IP new	");
 DEBUG_DUMP(DT,"DT new	");
 DEBUG_DUMP(B3at(DT),"*DT	");
 	jmp_indirect_24(DT);
-}
-void forth_loop(uint32_t cw_addr) {
+}	// }}}
+void forth_loop(uint32_t cw_addr) {	// {{{
 	INFO("Start of loop");
 	uint32_t fake[2];
 	fake[0]=cw_addr;
@@ -179,7 +176,7 @@ void forth_loop(uint32_t cw_addr) {
 //		((void (*)(void))B3PTR(B4at(DT)))();
 	};
 	INFO("End of loop");
-}
+}	// }}}
 
 // {{{ pop ...
 CELL_t pop() {
@@ -349,6 +346,11 @@ VARfn(HERE)
 VAR(BASE,16)
 CONST2(DOCOL,B3U32(f_docol))
 CONST2(RAM,B3U32(RAM))
+CONST2(RAM_END,B3U32(&RAM[RAM_LEN]))
+CONST2(S0,B3U32(stck))
+CONST2(S_END,B3U32(&stck[STACK_LEN]))
+CONST2(R0,B3U32(Rstck))
+CONST2(R_END,B3U32(&Rstck[RSTACK_LEN]))
 // {{{ dup, plus, ...
 void f_dup(){	// {{{
 	TRACE("DUP");
@@ -536,6 +538,64 @@ void f_DoubleAt(){	// {{{ D@ ( Daddr -- D ) Double at address(Double)
 	push2(B4at(pop2()));
 	NEXT;
 }	// }}}
+void f_ToR() {	// {{{ // ( u -- ; R: -- r ) Move to Rstack
+	INFO("f_ToR");
+	Rpush(pop());
+	NEXT;
+}	// }}}
+void f_DoubleToR() {	// {{{ // ( D -- ; R: -- r ) Move Double to Rstack (still one position on R)
+	INFO("f_DoubleToR");
+	Rpush(pop2());
+	NEXT;
+}	// }}}
+void f_FromR() {	// {{{ // ( -- u ; R: r -- ) Move from Rstack
+	INFO("f_FromR");
+	push(Rpop());
+	NEXT;
+}	// }}}
+void f_DoubleFromR() {	// {{{ // ( -- D ; R: r -- ) Move Double from Rstack (still one position on R)
+	INFO("f_DoubleFromR");
+	push2(Rpop());
+	NEXT;
+}	// }}}
+void f_CellAtR() {	// {{{ // ( -- u ; R: r -- r ) Peek from Rstack
+	INFO("f_CellAtR");
+	push(Rpeek());
+	NEXT;
+}	// }}}
+void f_DoubleAtR() {	// {{{ // ( -- D ; R: r -- r ) Peek from Rstack
+	INFO("f_DoubleAtR");
+	push2(Rpeek());
+	NEXT;
+}	// }}}
+void f_StackAddress() {	// {{{ // ( -- D ) Address, where Stack points
+	INFO("f_StackAddress");
+	push2(B3U32(&stck[stack]));
+	NEXT;
+}	// }}}
+void f_SetStack() {	// {{{ // ( D -- ?? ) Set Stack Address
+	INFO("f_SetStack");
+	int32_t S=pop2()-B3U32(&stck[0]);
+	if ((S<0) || (S>STACK_LEN*sizeof(stck[0]))) { ERROR("Out of stack area"); NEXT; return;};
+	int32_t s=S/sizeof(stck[0]);
+	if (s*sizeof(stck[0]) != S) { ERROR("Bad alligned stack"); NEXT; return;};
+	stack=s;
+	NEXT;
+}	// }}}
+void f_RStackAddress() {	// {{{ // ( -- D ) Address, where Rstack points
+	INFO("f_RStackAddress");
+	push2(B3U32(&Rstck[Rstack]));
+	NEXT;
+}	// }}}
+void f_SetRStack() {	// {{{ // ( D -- R: ?? ) Set Rstack Address
+	INFO("f_SetRStack");
+	int32_t S=pop2()-B3U32(&Rstck[0]);
+	if ((S<0) || (S>RSTACK_LEN*sizeof(Rstck[0]))) { ERROR("Out of Rstack area"); NEXT; return;};
+	int32_t s=S/sizeof(Rstck[0]);
+	if (s*sizeof(Rstck[0]) != S) { ERROR("Bad alligned Rstack"); NEXT; return;};
+	Rstack=s;
+	NEXT;
+}	// }}}
 void f_hex(){	// {{{
 	TRACE("hex");
 	BASE=16;
@@ -620,6 +680,59 @@ void f_show() {	// {{{ ; ' WORD show - try to show definition of WORD
 	TRACE("show");
 	DOUBLE_t cw=pop2();
 	show(cw);
+	NEXT;
+}	// }}}
+uint8_t export_name(DOUBLE_t cw) {	// {{{ export name and address from codeword - return flags
+	DOUBLE_t h=cw2h(cw);
+	if (!h) {ERROR("Not a word");return 0;};
+	uint8_t flags,len;
+	flags=B1at(h+4);
+	len=B1at(h+5);
+//	if (flags & FLG_HIDDEN) write_str(F("HIDDEN "));
+//	if (flags & FLG_IMMEDIATE) write_str(F("IMMEDIATE "));
+//	if (flags & FLG_ARG) write_str(F("ARG "));
+//	write_str(F("len: "));write_hex8(len);write_str(F(", name: "));
+//	write_str(F(STR_2LESS));
+	for (uint8_t i=0; i<len;i++) write_char(B1at(h+6+i));
+//	write_str(F(STR_2MORE));
+	return flags;
+}	// }}}
+void do_export(DOUBLE_t cw) {	// {{{ ; ' WORD export - try to export definition of WORD
+	TRACE("export");
+	DOUBLE_t h=cw2h(cw);
+	DOUBLE_t val;
+	uint8_t flags;
+	if (!h) {ERROR("Not a word");return;};
+	write_eoln();
+	write_str(F(": "));
+	flags = export_name(cw);
+	if (flags & FLG_IMMEDIATE) write_str(F(" IMMEDIATE"));
+	if (val_of_f_docol != B3at(cw)) {
+		write_str(F(" NOT_DOCOL definition "));
+		return;	// neumim rozepsat
+		};
+	do {
+		cw+=4;
+		val=B4at(cw);
+		if (val == val_of_w_exit_cw) break;
+		write_char(' ');
+		flags=export_name(val);
+		if (flags & FLG_ARG) {
+			cw+=4;
+			val=B4at(cw);
+			write_str(F(" \\'0x"));
+			write_hex32(val);
+			val=0;
+		};
+	} while (val != val_of_w_exit_cw);
+	write_str(F(" ;"));
+	write_eoln();
+
+}	// }}}
+void f_export() {	// {{{ ; ' WORD export - try to export definition of WORD
+	TRACE("export");
+	DOUBLE_t cw=pop2();
+	do_export(cw);
 	NEXT;
 }	// }}}
 void f_key(){	 // {{{ WAITS for char and puts it on stack
