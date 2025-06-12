@@ -7,6 +7,7 @@ char wait_for_char() {	// {{{
 	while (c ==0) {c=read_char();};
 	write_char(c);
 	if (c=='\r') write_char('\n');
+	if (c=='\n') write_char('\r');
 	return c;
 }	// }}}
 void write_str(const __memx char *c) { 	// {{{

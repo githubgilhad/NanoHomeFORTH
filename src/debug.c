@@ -64,6 +64,9 @@ bool is_in_range(uint32_t addr) {	 // {{{
 	return	((addr >= RAM_START)	&& (addr < RAM_END)) ||
 		((addr >= FLASH_START)	&& (addr < FLASH_END));
 }	// }}}
+bool is_in_Wrange(uint32_t addr) {	 // {{{
+	return	((addr >= RAM_START)	&& (addr < RAM_END));
+}	// }}}
 
 #elif defined(__PC__)
  #include <stdio.h>
@@ -81,6 +84,28 @@ bool is_in_range(uintptr_t addr /* void *addr*/) {
 
         if (sscanf(line, "%lx-%lx %4s", &start, &end, perms) == 3) {
             if ((target >= start && target < end) && perms[0] == 'r') {
+                fclose(fp);
+                return true;
+            }
+        }
+    }
+
+    fclose(fp);
+    return false;
+}
+bool is_in_Wrange(uintptr_t addr /* void *addr*/) {
+    FILE *fp = fopen("/proc/self/maps", "r");
+    if (!fp) return false;
+
+    uintptr_t target = (uintptr_t)addr;
+    char line[256];
+
+    while (fgets(line, sizeof(line), fp)) {
+        long unsigned int start, end;
+        char perms[5];
+
+        if (sscanf(line, "%lx-%lx %4s", &start, &end, perms) == 3) {
+            if ((target >= start && target < end) && perms[0] == 'r' && perms[1] == 'w') {
                 fclose(fp);
                 return true;
             }

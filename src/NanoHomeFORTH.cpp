@@ -41,8 +41,8 @@ void setup(){
 	bios <<(F("Hint: 0 nodebug 0 noinfo 0 notrace LAST D@ 20 + dump  \r\n"));
 #if defined(__AVR_ATmega2560__)
 	bios <<(F("Hint: hex ff DDRF !C aa PORTF !C ff DDRK !C aa PORTK !C : x ff  PINF !C ff  PINK !C ; x  \r\n"));
-	bios <<(F(": count- 0 BEGIN DUP c2C PORTF !C PORTK !C 1- DUP ==0 UNTIL c2C PORTF !C PORTK !C ; \r\n"));
-	bios <<(F(": count+ 0 BEGIN DUP c2C PORTF !C PORTK !C 1 + DUP ==0 UNTIL c2C PORTF !C PORTK !C ; \r\n"));
+	bios <<(F(": count- 0 BEGIN DUP c2C PORTF !C PORTK !C 1- DUP 0= UNTIL c2C PORTF !C PORTK !C ; \r\n"));
+	bios <<(F(": count+ 0 BEGIN DUP c2C PORTF !C PORTK !C 1 + DUP 0= UNTIL c2C PORTF !C PORTK !C ; \r\n"));
 #endif
 	bios <<(F("Test: : xx 0BRANCH [ 0 0C , ] 0 ; : xxx IF 1111 ELSE 2222 FI 3333 + ; \r\n")); 
 	bios << F(

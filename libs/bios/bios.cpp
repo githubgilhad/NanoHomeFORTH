@@ -288,6 +288,12 @@ void BIOS::clear(char c, BIOS_Color col) { 							// {{{ cursor to 0,0
 	set_cursor(0,0);
 }	// }}}
 
+extern "C" {
+	void BIOS_clear(char c, int col) { bios.clear(c, static_cast<BIOS_Color>(col)); }
+	void BIOS_set_cursor(uint8_t row, uint8_t col) { bios.set_cursor(row, col); }
+	uint16_t BIOS_get_key() {return bios.get_key(); }
+	void BIOS_wait(unsigned int dt) {bios.wait(dt);}
+}
 void BIOS::set_cursor(uint8_t row, uint8_t col) {						// {{{
 	cursor.x = col < BIOS_COLS? col: BIOS_COLS-1;
 	cursor.y = row < BIOS_ROWS? row: BIOS_ROWS-1;

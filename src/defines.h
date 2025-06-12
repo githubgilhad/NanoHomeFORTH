@@ -18,6 +18,11 @@
 	#define STR_DOWN  "" // 'v' 0x1A
 	
 	#define PROMPT STR_RIGHT
+	#define PROMPTcomp STR_RIGHT STR_2MORE
+
+	#define BIOS_ROWS		25					// number of rows of VGA text output
+	#define BIOS_COLS		37					// number of columns of VGA text output (more than 37 means noise from PS/2 input)
+
 #elif OUTPUT_TARGET == OUTPUT_TARGET_terminal
 	#define STR_2LESS "«" //0xC2 0xAB);//'«'
 	#define STR_2MORE "»" // 0xC2 0xBB);//'»'
@@ -27,14 +32,15 @@
 	#define STR_DOWN  "v" // 'v' 0x1A
 	
 	#define PROMPT STR_RIGHT
+	#define PROMPTcomp STR_RIGHT STR_2MORE
 #else
 	#warning "Unknown target OUTPUT_TARGET"
 #endif
 
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__)
 	#define RAM_LEN 	320	// word ~ 10B + name + 4 * words called - for start some 10 words should be enought
-	#define STACK_LEN	10
-	#define RSTACK_LEN	10
+	#define STACK_LEN	30
+	#define RSTACK_LEN	30
 #elif defined(__PC__)
 	#define RAM_LEN 	32000	// 32k should be enought for anyone :)
 	#define STACK_LEN	40
