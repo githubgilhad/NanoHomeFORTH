@@ -3,3 +3,15 @@
 *.cpp linguist-language=C++
 *.ino linguist-language=C++
 *.S linguist-language=Assembly
+./src/words.inc linguist-language=Assembly
+./src/jones.inc linguist-language=Assembly
+./src/forth.c linguist-language=C
+./src/memdump.c linguist-language=C
+./src/debug.c linguist-language=C
+./src/io.c linguist-language=C
+./src/itoa.h linguist-language=C
+./src/memdump.h linguist-language=C
+./src/debug.h linguist-language=C
+./src/io.h linguist-language=C
+./src/itoa.h linguist-language=C
+
