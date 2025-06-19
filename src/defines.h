@@ -33,6 +33,7 @@
 	
 	#define PROMPT STR_RIGHT
 	#define PROMPTcomp STR_RIGHT STR_2MORE
+	
 #else
 	#warning "Unknown target OUTPUT_TARGET"
 #endif
@@ -47,6 +48,11 @@
 	#define RSTACK_LEN	40
 #else
 #error undefined
+#endif
+
+#if defined(__PORTABLE_GRAPHIC__)
+	#define MAX_ROWS		25					// number of rows of emulated VGA text output
+	#define MAX_COLS		37					// number of columns emulated of VGA text output (more than 37 means noise from PS/2 input)
 #endif
 
 #endif

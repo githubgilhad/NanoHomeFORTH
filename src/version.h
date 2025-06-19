@@ -1,4 +1,4 @@
 #pragma once
-#define VERSION_STRING "0.0.1-8-g2af23c2++"
-#define VERSION_COMMIT "2af23c2"
-#define VERSION_MESSAGE "Stack <-> Rstack, export, RAM_END ..."
+#define VERSION_STRING "v0.1.1-1-gdff4b25++"
+#define VERSION_COMMIT "dff4b25"
+#define VERSION_MESSAGE "fix .gitattributes"

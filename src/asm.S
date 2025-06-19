@@ -340,15 +340,19 @@ DEFCONST2 DDR\name, 0x800001+\value
 DEFCONST2 PORT\name, 0x800002+\value
 .endm	// }}}
 #if OUTPUT_TARGET == OUTPUT_TARGET_vram
-DEFCONST2 VRAM vram
-DEFCONST2 CRAM cram
-DEFCONST2 BIOS_ROWS BIOS_ROWS
-DEFCONST2 BIOS_COLS BIOS_COLS
-DEFWORD w_CLS, 	0,	"CLS",	f_CLS
+DEFCONST2 VRAM, vram
+DEFCONST2 CRAM, cram
 DEFWORD w_VRAM_yx, 	0,	"VRAM_yx",	f_VRAM_yx	// ( y x -- daddr ) y row, x column, daddr addr in VRAM
+#endif
+#if defined(__PORTABLE_GRAPHIC__)
+DEFCONST1 "MAX_ROWS", MAX_ROWS
+DEFCONST1 "MAX_COLS", MAX_COLS
+DEFWORD w_CLS, 	0,	"CLS",	f_CLS
+DEFWORD w_fetchVRAM_yx,	0,	"VRAM_yx@",	f_fetchVRAM_yx	// ( y x -- c ) y row, x column, c character in VRAM
+DEFWORD w_storeVRAM_yx,	0,	"VRAM_yx!",	f_storeVRAM_yx	// ( y x c -- ) y row, x column, c character in VRAM
 DEFWORD w_CUR_yx, 	0,	"CUR_yx",	f_CUR_yx	// ( y x -- ) move cursor to  y row, x column
 DEFWORD w_KEYpress, 	0,	"KEYpress",	f_KEYpress	// ( -- c ) ascii of pressed key or 0
-DEFWORD w_WAIT, 	0,	"WAIT",		f_WAIT		// ( c -- ) bios.wait(c)
+DEFWORD w_WAIT, 	0,	"WAIT",		f_WAIT		// ( c -- ) wait(c) ~ c * 1/50 s 
 #endif
 #if defined(__AVR_ATmega328P__)
 PORT B, 0x23
@@ -370,6 +374,14 @@ PORT L, 0x109
 DEFWORD w_memdump,	0,	"memdump",	f_memdump	// ( daddr len -- ) dump data to file
 DEFWORD w_traceback,	0,	"traceback",	f_traceback	// ( daddr len -- ) dump traceback data to file
 #endif
+DEFCONST1 bit0, 0x01
+DEFCONST1 bit1, 0x02
+DEFCONST1 bit2, 0x04
+DEFCONST1 bit3, 0x08
+DEFCONST1 bit4, 0x10
+DEFCONST1 bit5, 0x20
+DEFCONST1 bit6, 0x40
+DEFCONST1 bit7, 0x80
 DEFWORD w_dump, 	0,	"dump",	f_dump
 DEFWORD w_show, 	0,	"show",	f_show		// ( cw -- ) show  try to show definition of WORD addressed by codeword
 DEFWORD w_export, 	0,	"export",	f_export	// ( cw -- ) try to export definition of WORD addressed by codeword for forth2inc.py
@@ -540,6 +552,10 @@ DEFWORD w_CMOVE, 	0,	"CMOVE",	f_CMOVE	// ( saddr daddr len -- ) CharMove (len) f
 DEFWORD w_LITSTRING, 	FLG_PSTRING,	"LITSTRING",	f_LITSTRING	// ( -- daddr len ) push daddr and len of string on the stack - similar to LIT
 DEFWORD w_TELL, 	0,	"TELL",	f_TELL			// ( daddr len -- ) prints out string
 DEFWORD w_EXECUTE, 	0,	"EXECUTE",	f_EXECUTE	// ( xt -- ) execute xt (&cw)
+DEFWORD w_ISINSTR,  	0,	"ISINSTR",	f_ISINSTR	// ( char addr len  -- flag ) if char is in string
+DEFWORD w_POS,  	0,	"POS",	f_POS			// ( char addr len  -- (pos) flag ) return flag and if found also zero based position
+DEFWORD w_RANDOM,	0,	"RANDOM",	f_RANDOM	// ( max -- rnd ) rnd 0..(max -1)
+
 # -------------------------------------------------------------------------------- more FORTH words
 
 DEFWORD w_quit,0,"QUIT",f_docol // main loop
